@@ -1,0 +1,627 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  background: #11191f;
+  color: #eef6f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 0%, #31545c 0, transparent 38%),
+    linear-gradient(145deg, #10191f, #182328 45%, #0b1013);
+}
+
+.shell {
+  width: min(1180px, 100vw);
+  padding: 16px;
+}
+
+.topbar {
+  min-height: 74px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  padding: 0 4px 12px;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1;
+}
+
+.topbar p,
+.help {
+  color: #b8c9c2;
+}
+
+.topbar-meta {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.profile-chip {
+  min-width: 136px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+  border: 1px solid #6d5930;
+  border-radius: 8px;
+  background: #1c2830dd;
+  box-shadow: 0 10px 24px #050a0d99;
+}
+
+.profile-chip span {
+  color: #d8cda9;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.profile-chip strong {
+  color: #ffd76e;
+  font-size: 16px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  color: #d9e8df;
+  font-size: 13px;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend i {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  border: 1px solid #0b1013;
+}
+
+.editor-bar {
+  min-height: 54px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #405059;
+  border-radius: 8px;
+  background: #17242bcc;
+}
+
+.editor-bar button {
+  height: 32px;
+  border: 1px solid #516872;
+  border-radius: 6px;
+  background: #263840;
+  color: #eef6f0;
+  padding: 0 12px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.editor-bar button:hover,
+.editor-bar button.active,
+#modeToggle[aria-pressed="true"] {
+  border-color: #efcb73;
+  background: #efcb73;
+  color: #172024;
+}
+
+.editor-bar .tool:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.editor-bar .tool:disabled:hover {
+  border-color: #516872;
+  background: #263840;
+  color: #eef6f0;
+}
+
+.tool-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tool-group span,
+#modeHint {
+  color: #b8c9c2;
+  font-size: 13px;
+}
+
+#modeHint {
+  margin-left: auto;
+}
+
+.game-area {
+  position: relative;
+}
+
+.item-toolbar {
+  position: absolute;
+  z-index: 5;
+  top: 16px;
+  left: 14px;
+  width: 62px;
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #405b68;
+  border-radius: 10px;
+  background: #14242dcc;
+  box-shadow: 0 12px 30px #050a0dcc;
+}
+
+.camera-rotate,
+.gold-panel,
+.market-toggle {
+  position: absolute;
+  z-index: 6;
+  right: 14px;
+  border: 1px solid #6d5930;
+  border-radius: 8px;
+  background: #1c2830dd;
+  box-shadow: 0 12px 30px #050a0dcc;
+}
+
+.camera-rotate {
+  top: 16px;
+  min-width: 112px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 10px;
+  color: #eef6f0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+}
+
+.camera-rotate:hover {
+  border-color: #efcb73;
+  background: #efcb73;
+  color: #172024;
+}
+
+.camera-rotate:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.camera-rotate span {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.camera-rotate strong {
+  font-size: 13px;
+}
+
+.gold-panel {
+  top: 60px;
+  min-width: 112px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+.gold-panel span {
+  color: #d8cda9;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.gold-panel strong {
+  color: #ffd76e;
+  font-size: 18px;
+}
+
+.market-toggle {
+  top: 104px;
+  height: 34px;
+  padding: 0 14px;
+  color: #172024;
+  background: #efcb73;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.view-controls {
+  position: absolute;
+  z-index: 6;
+  top: 146px;
+  right: 14px;
+  display: flex;
+  gap: 6px;
+}
+
+.view-controls button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #526d7a;
+  border-radius: 8px;
+  background: #203943;
+  color: #eef6f0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0;
+  box-shadow: 0 12px 30px #050a0dcc;
+}
+
+.view-controls button:hover {
+  border-color: #efcb73;
+  background: #efcb73;
+  color: #172024;
+}
+
+.toolbar-slot,
+.inventory-slot {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #526d7a;
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, #203943, #15252d);
+  cursor: pointer;
+  position: relative;
+}
+
+.toolbar-slot.active {
+  border-color: #efcb73;
+  box-shadow: inset 0 0 0 2px #efcb73, 0 0 14px #efcb7355;
+}
+
+.toolbar-slot.empty,
+.inventory-slot.empty {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.toolbar-slot img,
+.inventory-slot img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.slot-key {
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  color: #d7e7e1;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.slot-count {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  min-width: 17px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #0b1115;
+  border-radius: 5px;
+  background: #f4d47b;
+  color: #050a0d;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0 3px;
+}
+
+.inventory-panel {
+  position: absolute;
+  z-index: 8;
+  top: 66px;
+  left: 88px;
+  width: 330px;
+  border: 1px solid #507083;
+  border-radius: 10px;
+  background: #101d24ee;
+  box-shadow: 0 20px 50px #020608cc;
+  padding: 12px;
+}
+
+.market-panel {
+  position: absolute;
+  z-index: 8;
+  top: 188px;
+  right: 14px;
+  width: 340px;
+  border: 1px solid #7d6740;
+  border-radius: 10px;
+  background: #101d24ee;
+  box-shadow: 0 20px 50px #020608cc;
+  padding: 12px;
+}
+
+.market-panel.hidden {
+  display: none;
+}
+
+.market-panel header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.market-panel h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.panel-close {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #526d7a;
+  border-radius: 6px;
+  background: #203943;
+  color: #eef6f0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  margin-left: auto;
+  padding: 0;
+}
+
+.panel-close:hover {
+  border-color: #efcb73;
+  background: #efcb73;
+  color: #172024;
+}
+
+.market-panel span {
+  color: #b8c9c2;
+  font-size: 12px;
+}
+
+.market-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.market-row {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 42px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #334a55;
+  border-radius: 8px;
+  background: #172830;
+  padding: 6px;
+}
+
+.market-row img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.market-land-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #7a5b32;
+  border-radius: 7px;
+  background: linear-gradient(145deg, #7d4f2b, #5f9634);
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 2px 0 #11191f;
+}
+
+.market-row strong {
+  display: block;
+  font-size: 13px;
+}
+
+.market-row small {
+  color: #d8cda9;
+  font-size: 11px;
+}
+
+.market-row button {
+  height: 30px;
+  border: 1px solid #efcb73;
+  border-radius: 6px;
+  background: #efcb73;
+  color: #172024;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.market-row button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.market-qty-stepper {
+  height: 30px;
+  display: grid;
+  grid-template-columns: 26px 34px 26px;
+  align-items: center;
+  border: 1px solid #526d7a;
+  border-radius: 6px;
+  background: #203943;
+  overflow: hidden;
+}
+
+.market-row .market-qty-button {
+  width: 26px;
+  height: 30px;
+  border: 0;
+  border-radius: 0;
+  background: #203943;
+  color: #eef6f0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  padding: 0;
+}
+
+.market-row .market-qty-button:hover:not(:disabled) {
+  background: #efcb73;
+  color: #172024;
+}
+
+.market-row .market-qty-button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.market-qty-value {
+  min-width: 34px;
+  color: #eef6f0;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 30px;
+  text-align: center;
+}
+
+.inventory-panel.hidden {
+  display: none;
+}
+
+.inventory-panel header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.inventory-panel h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.inventory-panel span {
+  color: #b8c9c2;
+  font-size: 12px;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 46px);
+  gap: 8px;
+}
+
+.inventory-slot {
+  width: 46px;
+  height: 46px;
+}
+
+.grass {
+  background: #5e8f2e;
+}
+
+.stone {
+  background: #b8aa88;
+}
+
+.soil {
+  background: #7d4f2b;
+}
+
+.water {
+  background: #2379be;
+}
+
+.crop {
+  background: #efcb73;
+}
+
+#game {
+  width: 1152px;
+  height: 704px;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid #405059;
+  border-radius: 8px;
+  background: #142027;
+  box-shadow: 0 24px 70px #03080a99;
+}
+
+#game canvas {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  image-rendering: auto;
+}
+
+.help {
+  padding-top: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.interior-active .editor-bar,
+.interior-active .item-toolbar,
+.interior-active .camera-rotate,
+.interior-active .gold-panel,
+.interior-active .market-toggle,
+.interior-active .view-controls,
+.interior-active .inventory-panel,
+.interior-active .market-panel,
+.interior-active .help {
+  display: none;
+}

@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tactics Block Terrain - Contenido del Juego</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #11191d;
+        --panel: #17252b;
+        --panel-2: #1f333b;
+        --text: #f4f0de;
+        --muted: #b9c9c5;
+        --line: #47606a;
+        --accent: #f0c96a;
+        --accent-2: #7fc97f;
+        --code: #0c1418;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.15;
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 38px;
+      }
+
+      h2 {
+        margin-top: 34px;
+        font-size: 26px;
+        color: var(--accent);
+      }
+
+      h3 {
+        margin-top: 22px;
+        font-size: 19px;
+      }
+
+      p {
+        margin: 10px 0;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      code {
+        background: var(--code);
+        border: 1px solid #263943;
+        border-radius: 4px;
+        padding: 2px 6px;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 18px;
+        max-width: 900px;
+      }
+
+      .toc,
+      section,
+      .note {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .toc {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 22px;
+      }
+
+      .toc ol {
+        columns: 2;
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      section {
+        margin-top: 18px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel-2);
+        color: var(--accent);
+      }
+
+      ul {
+        margin: 10px 0 0;
+        padding-left: 22px;
+      }
+
+      .pill {
+        display: inline-block;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--accent-2);
+        margin: 3px 4px 3px 0;
+        padding: 2px 8px;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Tactics Block Terrain: Contenido del Juego</h1>
+        <p class="lead">
+          Indice del contenido actual del prototipo: sistemas, entidades, recursos, escenas,
+          controles y reglas de gameplay que ya existen en la base.
+        </p>
+      </header>
+
+      <nav class="toc" aria-label="Indice">
+        <strong>Indice</strong>
+        <ol>
+          <li><a href="#resumen">Resumen</a></li>
+          <li><a href="#escenas">Escenas</a></li>
+          <li><a href="#perfil">Perfil y persistencia</a></li>
+          <li><a href="#terreno">Terreno y bloques</a></li>
+          <li><a href="#camara">Camara</a></li>
+          <li><a href="#edificios">Edificios</a></li>
+          <li><a href="#interiores">Interiores</a></li>
+          <li><a href="#cultivos">Cultivos</a></li>
+          <li><a href="#inventario">Inventario y toolbar</a></li>
+          <li><a href="#market">Market y oro</a></li>
+          <li><a href="#controles">Controles</a></li>
+          <li><a href="#assets">Assets</a></li>
+        </ol>
+      </nav>
+
+      <section id="resumen">
+        <h2>1. Resumen</h2>
+        <p>
+          El juego es un prototipo de granja isometrica por bloques. La base actual permite
+          editar terreno, apilar alturas, mover edificios, cultivar, comprar/vender, expandir
+          el mapa, entrar a interiores y mover muebles.
+        </p>
+        <p>
+          El proyecto vive en <code>tactics</code>. Las imagenes fuente grandes se guardan fuera,
+          en <code>tactics source image</code>, para que la carpeta runtime solo cargue sprites livianos.
+        </p>
+      </section>
+
+      <section id="escenas">
+        <h2>2. Escenas</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Escena</th>
+              <th>Archivo</th>
+              <th>Responsabilidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Granja</td>
+              <td><code>src/scenes/farm-scene.js</code></td>
+              <td>Render del mapa exterior, editor, cultivos, edificios, movimiento de personaje y entrada a interiores.</td>
+            </tr>
+            <tr>
+              <td>Interior de casa</td>
+              <td><code>src/scenes/house-interior-scene.js</code></td>
+              <td>Mapa interior por bloques, areas de casa, salida, muebles movibles y pan de camara interior.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="perfil">
+        <h2>3. Perfil y Persistencia</h2>
+        <p>
+          El perfil principal es <code>GM</code> o <code>Game Manager</code>. Tiene permisos especiales
+          para moldear terreno con elevacion y rotar camara.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Estado persistente</th>
+              <th>Contenido</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Perfil GM</td>
+              <td>Oro, expansiones, camara, zoom, toolbar, inventario, grid, cultivos, edificios, jugador e interiores.</td>
+            </tr>
+            <tr>
+              <td>Interiores</td>
+              <td>Posicion de muebles por edificio, actualmente bajo <code>interiors.house.items</code>.</td>
+            </tr>
+            <tr>
+              <td>Storage</td>
+              <td><code>localStorage</code> con key versionada <code>tactics.profile.GM.v1</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="terreno">
+        <h2>4. Terreno y Bloques</h2>
+        <p>
+          El mapa usa bloques isometricos con materiales y altura. Los bloques pueden ser elevados
+          o bajados en modo editor.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Bloque</th>
+              <th>Uso</th>
+              <th>Notas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Grass</td>
+              <td>Terreno base, soporte de edificios y expansiones.</td>
+              <td>Las expansiones nuevas salen como grass puro.</td>
+            </tr>
+            <tr>
+              <td>Soil</td>
+              <td>Plot cultivable.</td>
+              <td>Permite plantar seeds y mostrar timers de crecimiento.</td>
+            </tr>
+            <tr>
+              <td>Water</td>
+              <td>Terreno no caminable / visual de estanque o canal.</td>
+              <td>Actualmente usa tile recto simple.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="camara">
+        <h2>5. Camara</h2>
+        <ul>
+          <li>Rotacion en 4 angulos: <code>0deg</code>, <code>90deg</code>, <code>180deg</code>, <code>270deg</code>.</li>
+          <li>Zoom in/out con botones y rueda.</li>
+          <li>Pan del mapa exterior con click sostenido y drag.</li>
+          <li>Pan del interior de casa tambien persistente.</li>
+          <li>La orientacion del personaje y anchors de buildings se mantienen independientes de la rotacion visual.</li>
+        </ul>
+      </section>
+
+      <section id="edificios">
+        <h2>6. Edificios</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Edificio</th>
+              <th>Footprint</th>
+              <th>Comportamiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>House</td>
+              <td>2x2</td>
+              <td>Movible en editor. En play mode, tocarla entra a la escena interior.</td>
+            </tr>
+            <tr>
+              <td>Barn</td>
+              <td>3x3</td>
+              <td>Movible en editor con overlay verde/rojo de colocacion.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Los edificios se colocan por footprint y usan un anchor norte para que el movimiento sea
+          consistente aunque el mapa este rotado.
+        </p>
+      </section>
+
+      <section id="interiores">
+        <h2>7. Interiores</h2>
+        <p>
+          La casa tiene un interior isometrico por bloques, sin paredes cerradas, dividido por texturas:
+          dormitorio, cocina y sala.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Mueble</th>
+              <th>Footprint</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cama</td>
+              <td>2x3</td>
+              <td>Movible y persistente.</td>
+            </tr>
+            <tr>
+              <td>Estufa</td>
+              <td>2x2</td>
+              <td>Movible y persistente.</td>
+            </tr>
+            <tr>
+              <td>Armario</td>
+              <td>2x1</td>
+              <td>Movible y persistente.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Los muebles pueden ocupar bloques del borde exterior, pero no pueden colocarse sobre la salida.
+        </p>
+      </section>
+
+      <section id="cultivos">
+        <h2>8. Cultivos</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Cultivo</th>
+              <th>Estados visuales</th>
+              <th>Uso economico</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Carrot</td>
+              <td>Seed, stage 1, stage 2, stage 3, produce.</td>
+              <td>Se compra como seed pack y se vende como produce.</td>
+            </tr>
+            <tr>
+              <td>Wheat</td>
+              <td>Seed, stage 1, stage 2, stage 3, produce.</td>
+              <td>Se compra como seed pack y se vende como produce.</td>
+            </tr>
+            <tr>
+              <td>Turnip</td>
+              <td>Seed, stage 1, stage 2, stage 3, produce.</td>
+              <td>Se compra como seed pack y se vende como produce.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Cada cultivo tiene tiempo de crecimiento distinto y timer visible en blanco con borde negro.
+        </p>
+      </section>
+
+      <section id="inventario">
+        <h2>9. Inventario y Toolbar</h2>
+        <ul>
+          <li>Inventario con stacks hasta 99.</li>
+          <li>Toolbar lateral para herramientas/seeds.</li>
+          <li>Herramienta de mano para cosechar.</li>
+          <li>Seed packs para plantar.</li>
+          <li>Produce como item de inventario para vender.</li>
+          <li>Inventario y market no pueden estar abiertos a la vez.</li>
+          <li>Paneles cierran con <code>Esc</code> y con boton <code>X</code>.</li>
+        </ul>
+      </section>
+
+      <section id="market">
+        <h2>10. Market y Oro</h2>
+        <p>
+          El market permite comprar seeds, vender produce y comprar expansiones de terreno.
+          Las cantidades se manejan con botones <code>-</code> y <code>+</code> junto al numero.
+        </p>
+        <ul>
+          <li>El oro se guarda en el perfil GM.</li>
+          <li>El market muestra cantidad de venta y oro recibido.</li>
+          <li>Comprar land expansion agrega terreno nuevo como grass.</li>
+        </ul>
+      </section>
+
+      <section id="controles">
+        <h2>11. Controles</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Input</th>
+              <th>Accion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>E</code></td><td>Activa/desactiva editor.</td></tr>
+            <tr><td><code>I</code></td><td>Abre/cierra inventario.</td></tr>
+            <tr><td><code>M</code></td><td>Abre/cierra market.</td></tr>
+            <tr><td><code>Esc</code></td><td>Cierra paneles o vuelve desde interior.</td></tr>
+            <tr><td><code>WASD</code> / flechas</td><td>Mueve el marcador/personaje por tiles.</td></tr>
+            <tr><td><code>Shift + click</code></td><td>Caminar hacia un tile.</td></tr>
+            <tr><td><code>R</code></td><td>Reset del escenario y layout interior.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="assets">
+        <h2>12. Assets</h2>
+        <p>
+          Los sprites runtime estan en <code>assets</code>. Los sources grandes y capturas de verificacion
+          estan fuera de <code>tactics</code> para mantener el proyecto liviano.
+        </p>
+        <p>
+          <span class="pill">terrain sprites</span>
+          <span class="pill">building sprites</span>
+          <span class="pill">crop sprites</span>
+          <span class="pill">seed packs</span>
+          <span class="pill">produce icons</span>
+          <span class="pill">interior furniture</span>
+          <span class="pill">player marker/sprites</span>
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

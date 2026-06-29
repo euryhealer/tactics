@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Base de Motor - Sistema de Bloques Isometricos</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10171b;
+        --panel: #172329;
+        --panel-2: #22363e;
+        --text: #f5f1df;
+        --muted: #b7c7c5;
+        --line: #48616b;
+        --accent: #f0c96a;
+        --green: #80c47b;
+        --red: #ec756e;
+        --code: #0b1215;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1160px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.15;
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 38px;
+      }
+
+      h2 {
+        color: var(--accent);
+        font-size: 26px;
+        margin-top: 34px;
+      }
+
+      h3 {
+        font-size: 19px;
+        margin-top: 22px;
+      }
+
+      p {
+        margin: 10px 0;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      code,
+      pre {
+        background: var(--code);
+        border: 1px solid #263943;
+        border-radius: 4px;
+      }
+
+      code {
+        padding: 2px 6px;
+      }
+
+      pre {
+        overflow-x: auto;
+        padding: 12px;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 18px;
+        max-width: 920px;
+      }
+
+      .toc,
+      section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .toc {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 22px;
+      }
+
+      .toc ol {
+        columns: 2;
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      section {
+        margin-top: 18px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel-2);
+        color: var(--accent);
+      }
+
+      ul {
+        margin: 10px 0 0;
+        padding-left: 22px;
+      }
+
+      .status-good {
+        color: var(--green);
+        font-weight: 700;
+      }
+
+      .status-risk {
+        color: var(--red);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Base de Motor: Bloques Isometricos</h1>
+        <p class="lead">
+          Documento tecnico para usar Tactics Block Terrain como base de motor:
+          arquitectura, sistemas reutilizables, ruta hacia backend y tipos de juegos
+          que se benefician de este enfoque.
+        </p>
+      </header>
+
+      <nav class="toc" aria-label="Indice">
+        <strong>Indice</strong>
+        <ol>
+          <li><a href="#vision">Vision del motor</a></li>
+          <li><a href="#arquitectura">Arquitectura actual</a></li>
+          <li><a href="#sistemas">Sistemas reutilizables</a></li>
+          <li><a href="#contratos">Contratos de datos</a></li>
+          <li><a href="#backend">Ruta hacia backend</a></li>
+          <li><a href="#editores">Editores y herramientas</a></li>
+          <li><a href="#generos">Juegos beneficiados</a></li>
+          <li><a href="#fortalezas">Fortalezas del sistema</a></li>
+          <li><a href="#limites">Limites y riesgos</a></li>
+          <li><a href="#roadmap">Roadmap recomendado</a></li>
+        </ol>
+      </nav>
+
+      <section id="vision">
+        <h2>1. Vision del Motor</h2>
+        <p>
+          El proyecto puede evolucionar hacia un motor 2.5D isometrico basado en tiles,
+          footprints y escenas conectadas. La idea central es separar el contenido del juego
+          de los sistemas generales: terreno, camara, colocacion, inventario, economia,
+          persistencia, escenas interiores y herramientas de editor.
+        </p>
+        <p>
+          La gran ventaja es que el mismo sistema de bloques puede servir para mundos exteriores,
+          interiores, bases, ciudades, dungeons, granjas, tableros tacticos o mapas editables.
+        </p>
+      </section>
+
+      <section id="arquitectura">
+        <h2>2. Arquitectura Actual</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Capa</th>
+              <th>Archivo</th>
+              <th>Rol como motor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Bootstrap</td>
+              <td><code>game.js</code></td>
+              <td>Inicializa Phaser, registra escenas y arranca UI.</td>
+            </tr>
+            <tr>
+              <td>Estado y datos</td>
+              <td><code>src/core/state.js</code></td>
+              <td>Define constantes, catalogos, perfil, estado mutable e interiores default.</td>
+            </tr>
+            <tr>
+              <td>Mundo</td>
+              <td><code>src/core/world.js</code></td>
+              <td>Transformaciones isometricas, grid, persistencia, edificios, pathing y helpers.</td>
+            </tr>
+            <tr>
+              <td>Escenas</td>
+              <td><code>src/scenes</code></td>
+              <td>Render e interaccion de mapas exteriores/interiores.</td>
+            </tr>
+            <tr>
+              <td>UI</td>
+              <td><code>src/ui/panels.js</code></td>
+              <td>Inventario, market, toolbar, editor bar y paneles.</td>
+            </tr>
+            <tr>
+              <td>Debug</td>
+              <td><code>src/debug.js</code></td>
+              <td>Hooks para pruebas automatizadas y control local.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="sistemas">
+        <h2>3. Sistemas Reutilizables</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Sistema</th>
+              <th>Reutilizable para</th>
+              <th>Estado actual</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Grid isometrico con altura</td>
+              <td>Mapas por tiles, elevaciones, terrazas, plataformas, rios y zonas tacticas.</td>
+              <td><span class="status-good">Funcional</span></td>
+            </tr>
+            <tr>
+              <td>Camara 4 angulos + zoom + pan</td>
+              <td>Exploracion, edicion, lectura de mapas grandes.</td>
+              <td><span class="status-good">Funcional</span></td>
+            </tr>
+            <tr>
+              <td>Footprints</td>
+              <td>Buildings, muebles, maquinas, decoracion, unidades grandes.</td>
+              <td><span class="status-good">Funcional</span></td>
+            </tr>
+            <tr>
+              <td>Overlay de colocacion</td>
+              <td>Construccion, edicion de interiores, validacion de zonas.</td>
+              <td><span class="status-good">Funcional</span></td>
+            </tr>
+            <tr>
+              <td>Persistencia versionada</td>
+              <td>Perfil, progreso, saves, backend sync.</td>
+              <td><span class="status-good">LocalStorage</span></td>
+            </tr>
+            <tr>
+              <td>Inventario y stacks</td>
+              <td>RPG, farming, survival, crafting, shop systems.</td>
+              <td><span class="status-good">Funcional</span></td>
+            </tr>
+            <tr>
+              <td>Market</td>
+              <td>Compra/venta, economia, vendors, progression gates.</td>
+              <td><span class="status-good">Funcional</span></td>
+            </tr>
+            <tr>
+              <td>Pathing tile-based</td>
+              <td>Personajes, NPCs, unidades tacticas, workers.</td>
+              <td><span class="status-good">Basico</span></td>
+            </tr>
+            <tr>
+              <td>Interiores por escena</td>
+              <td>Casas, tiendas, dungeons, habitaciones editables.</td>
+              <td><span class="status-good">Base funcional</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="contratos">
+        <h2>4. Contratos de Datos</h2>
+        <p>
+          Para convertir esto en motor, conviene formalizar los datos. Los siguientes contratos
+          son la forma recomendada de pensar el save y la comunicacion futura con backend.
+        </p>
+        <h3>Tile</h3>
+        <pre><code>{
+  "x": 0,
+  "y": 0,
+  "type": "grass",
+  "height": 1,
+  "crop": null
+}</code></pre>
+
+        <h3>Building</h3>
+        <pre><code>{
+  "id": "house",
+  "x": 8,
+  "y": 1,
+  "width": 2,
+  "height": 2,
+  "interiorId": "house"
+}</code></pre>
+
+        <h3>Interior</h3>
+        <pre><code>{
+  "id": "house",
+  "items": {
+    "bed": { "x": 1, "y": 1 },
+    "stove": { "x": 5, "y": 1 },
+    "wardrobe": { "x": 0, "y": 1 }
+  }
+}</code></pre>
+
+        <h3>Item Stack</h3>
+        <pre><code>{
+  "id": "carrot",
+  "qty": 12
+}</code></pre>
+      </section>
+
+      <section id="backend">
+        <h2>5. Ruta Hacia Backend</h2>
+        <p>
+          El paso correcto no es conectar backend directo desde cada escena. Conviene introducir
+          una capa de servicios entre estado local y red.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Paso</th>
+              <th>Objetivo</th>
+              <th>Archivo/capa sugerida</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Crear un adapter de save/load con la misma API para localStorage y backend.</td>
+              <td><code>src/services/save-service.js</code></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Centralizar serializacion/deserializacion del perfil.</td>
+              <td><code>src/core/profile-save.js</code></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Agregar estado de sesion, userId y token.</td>
+              <td><code>src/services/session-service.js</code></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Sincronizar cambios importantes por eventos: mover building, plantar, vender, editar interior.</td>
+              <td><code>src/services/sync-service.js</code></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Resolver conflictos entre cliente y servidor.</td>
+              <td>Versiones de save, timestamps, revision number.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Para multiplayer o persistencia online, el servidor deberia validar acciones de economia,
+          construccion y movimiento de objetos importantes. El cliente puede seguir renderizando y
+          previsualizando, pero el backend deberia ser autoridad en saves compartidos.
+        </p>
+      </section>
+
+      <section id="editores">
+        <h2>6. Editores y Herramientas</h2>
+        <p>
+          El perfil GM ya funciona como modo editor. Eso puede crecer hacia herramientas internas:
+        </p>
+        <ul>
+          <li>Editor de terrain brushes: grass, soil, water, altura, erase.</li>
+          <li>Editor de buildings con catalogo, footprint y reglas de colocacion.</li>
+          <li>Editor de interiores con catalogo de muebles.</li>
+          <li>Editor de crops, timers, precios y drops.</li>
+          <li>Export/import de mapas como JSON.</li>
+          <li>Validadores de mapa: areas desconectadas, edificios fuera de bounds, objetos bloqueando salidas.</li>
+        </ul>
+      </section>
+
+      <section id="generos">
+        <h2>7. Tipos de Juegos Beneficiados</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo de juego</th>
+              <th>Por que encaja</th>
+              <th>Sistemas utiles</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Farming / life sim</td>
+              <td>Plots, cultivos, interiores, inventario, mercado y progresion por expansiones.</td>
+              <td>Soil, crops, market, buildings, interiors.</td>
+            </tr>
+            <tr>
+              <td>City builder compacto</td>
+              <td>Footprints, caminos, edificios, terrain shaping y economia.</td>
+              <td>Buildings, terrain, overlays, backend saves.</td>
+            </tr>
+            <tr>
+              <td>Tactical RPG</td>
+              <td>Altura, grid, pathing, lineas de vision futuras y unidades por tiles.</td>
+              <td>Grid, height, pathing, camera rotation.</td>
+            </tr>
+            <tr>
+              <td>Base builder / colony sim</td>
+              <td>Construccion por bloques, interiores, workers, storage y produccion.</td>
+              <td>Footprints, inventory, interiors, map expansion.</td>
+            </tr>
+            <tr>
+              <td>Survival crafting</td>
+              <td>Terreno editable, recursos, crafting futuro, refugios e inventario.</td>
+              <td>Inventory, blocks, buildings, market/crafting economy.</td>
+            </tr>
+            <tr>
+              <td>Puzzle isometrico</td>
+              <td>Lectura visual clara, elevaciones, objetos movibles y reglas por tile.</td>
+              <td>Grid, overlays, movable objects, exits.</td>
+            </tr>
+            <tr>
+              <td>Dungeon crawler por salas</td>
+              <td>Escenas interiores por bloques, salidas, objetos y rooms persistentes.</td>
+              <td>Interior scenes, pathing, persistent room state.</td>
+            </tr>
+            <tr>
+              <td>Tycoon / management</td>
+              <td>Economia, expansion, edificios y produccion visual por tiles.</td>
+              <td>Market, gold, buildings, land expansion.</td>
+            </tr>
+            <tr>
+              <td>Sandbox creativo</td>
+              <td>El editor GM ya permite moldear terreno y mover entidades.</td>
+              <td>Editor mode, terrain stacking, furniture/buildings.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="fortalezas">
+        <h2>8. Fortalezas del Sistema de Bloques Isometricos</h2>
+        <ul>
+          <li>Permite mucha profundidad visual con sprites 2D livianos.</li>
+          <li>El grid da reglas claras para colocar, mover, validar y persistir objetos.</li>
+          <li>Las alturas agregan lectura tactica sin necesitar 3D real.</li>
+          <li>El mismo renderer sirve para exteriores e interiores.</li>
+          <li>Los footprints unifican edificios, muebles, maquinas y unidades grandes.</li>
+          <li>La rotacion de camara en 4 angulos mejora inspeccion de mapas densos.</li>
+        </ul>
+      </section>
+
+      <section id="limites">
+        <h2>9. Limites y Riesgos</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Riesgo</th>
+              <th>Impacto</th>
+              <th>Solucion recomendada</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Estado global compartido</td>
+              <td>Puede crecer dificil de mantener.</td>
+              <td>Mover a stores/servicios con API clara antes de backend.</td>
+            </tr>
+            <tr>
+              <td>Render inmediato con graphics</td>
+              <td>Mapas grandes pueden bajar performance.</td>
+              <td>Chunking, dirty rendering o tilemap/cache por capas.</td>
+            </tr>
+            <tr>
+              <td>Pathing basico</td>
+              <td>No escala a NPCs complejos.</td>
+              <td>A* con costos por terreno, bloqueo dinamico y reservas.</td>
+            </tr>
+            <tr>
+              <td>Persistencia local</td>
+              <td>No sirve para cuentas reales o multi-dispositivo.</td>
+              <td>Save service con backend y migraciones versionadas.</td>
+            </tr>
+            <tr>
+              <td>Catalogos hardcoded</td>
+              <td>Agregar contenido requiere tocar codigo.</td>
+              <td>Mover crops, items, buildings y furniture a JSON.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="roadmap">
+        <h2>10. Roadmap Recomendado</h2>
+        <ol>
+          <li>Extraer catalogos de contenido a JSON: items, crops, buildings, furniture, blocks.</li>
+          <li>Crear <code>save-service</code> con backend/localStorage intercambiables.</li>
+          <li>Crear un sistema generico de escenas interiores por <code>interiorId</code>.</li>
+          <li>Unificar placement de buildings y furniture en un solo placement engine.</li>
+          <li>Agregar export/import de mapas e interiores para herramientas GM.</li>
+          <li>Crear backend inicial con perfiles, saves y revision number.</li>
+          <li>Optimizar render cuando el mapa crezca: chunks, cache, dirty redraw.</li>
+          <li>Agregar catalogo visual para colocar edificios/muebles desde UI.</li>
+        </ol>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tactics Block Terrain</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <h1>Tactics Block Terrain</h1>
+          <p>Isometric farming blocks with editable grass, water, soil plots, and crop growth timers.</p>
+        </div>
+        <div class="topbar-meta">
+          <div class="profile-chip" aria-label="Active profile">
+            <span>Profile</span>
+            <strong id="profileName">GM</strong>
+          </div>
+          <div class="legend">
+            <span><i class="grass"></i>Grass</span>
+            <span><i class="soil"></i>Soil</span>
+            <span><i class="water"></i>Water</span>
+            <span><i class="crop"></i>Crop</span>
+          </div>
+        </div>
+      </section>
+      <section class="editor-bar">
+        <button id="modeToggle" type="button" aria-pressed="false">Editor: Off</button>
+        <div class="tool-group">
+          <span>Block</span>
+          <button class="tool active" type="button" data-tool="block" data-value="grass">Grass</button>
+          <button class="tool" type="button" data-tool="block" data-value="water">Water</button>
+          <button class="tool" type="button" data-tool="block" data-value="soil">Soil</button>
+        </div>
+        <p id="modeHint">Play mode: plant seeds, harvest mature crops, or open market with M.</p>
+      </section>
+      <section class="game-area">
+        <aside id="itemToolbar" class="item-toolbar" aria-label="Crop toolbar"></aside>
+        <button id="cameraRotate" class="camera-rotate" type="button" aria-label="Rotate camera">
+          <span aria-hidden="true">&#128247;</span>
+          <strong id="cameraAngle">0deg</strong>
+        </button>
+        <div class="gold-panel" aria-label="Gold"><span>Gold</span><strong id="goldAmount">0</strong></div>
+        <button id="marketToggle" class="market-toggle" type="button">Market</button>
+        <div class="view-controls" aria-label="View controls">
+          <button id="zoomOut" type="button" aria-label="Zoom out">-</button>
+          <button id="zoomIn" type="button" aria-label="Zoom in">+</button>
+        </div>
+        <div id="game"></div>
+        <section id="inventoryPanel" class="inventory-panel hidden" aria-label="Inventory">
+          <header>
+            <h2>Inventory</h2>
+            <span>Double click to move items</span>
+            <button id="inventoryClose" class="panel-close" type="button" aria-label="Close inventory">X</button>
+          </header>
+          <div id="inventoryGrid" class="inventory-grid"></div>
+        </section>
+        <section id="marketPanel" class="market-panel hidden" aria-label="Market">
+          <header>
+            <h2>Market</h2>
+            <span>Buy seeds, sell harvests</span>
+            <button id="marketClose" class="panel-close" type="button" aria-label="Close market">X</button>
+          </header>
+          <div id="marketGrid" class="market-grid"></div>
+        </section>
+      </section>
+      <p class="help">E toggles editor. I opens inventory. M opens market. WASD/arrows move. Shift+click walks to a tile.</p>
+    </main>
+    <script src="./vendor/phaser.min.js"></script>
+    <script src="./src/core/state.js"></script>
+    <script src="./src/core/world.js"></script>
+    <script src="./src/scenes/farm-scene.js"></script>
+    <script src="./src/ui/panels.js"></script>
+    <script src="./src/debug.js"></script>
+    <script src="./src/scenes/house-interior-scene.js"></script>
+    <script src="./game.js"></script>
+  </body>
+</html>

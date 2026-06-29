@@ -1,0 +1,23 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Dependency/cache folders
+node_modules/
+.npm/
+.cache/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local environment files
+.env
+.env.*
+
+# Generated verification captures should stay out of the runtime repo
+*-check.png
+*-check-*.png
+
