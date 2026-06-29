@@ -133,7 +133,7 @@ function isPlayerAt(cell) {
 }
 
 function activeProfile() {
-  return editorState.profiles[editorState.activeProfileId] ?? null;
+  return editorState.profiles[editorState.activeProfileId] ?? editorState.profiles.GM ?? null;
 }
 
 function profileCan(permission) {
@@ -142,6 +142,57 @@ function profileCan(permission) {
 
 function activeProfileStorageKey() {
   return `tactics.profile.${editorState.activeProfileId}.v${SAVE_VERSION}`;
+}
+
+function resetProfileRuntimeState() {
+  clearBuildingMoveState();
+  terrainGrid = makeInitialGrid();
+  editorState.enabled = false;
+  editorState.blockBrush = "grass";
+  editorState.selected = null;
+  editorState.selectedToolbarIndex = 1;
+  editorState.inventoryOpen = false;
+  editorState.marketOpen = false;
+  editorState.interiors = makeDefaultInteriors();
+  editorState.gold = 24;
+  editorState.landExpansions = 0;
+  editorState.viewRotation = 0;
+  editorState.zoom = 1;
+  editorState.cameraPan.x = 0;
+  editorState.cameraPan.y = 0;
+  editorState.interiorCameraPan.x = 0;
+  editorState.interiorCameraPan.y = 0;
+  editorState.house.x = INITIAL_HOUSE.x;
+  editorState.house.y = INITIAL_HOUSE.y;
+  editorState.house.width = HOUSE_FOOTPRINT.width;
+  editorState.house.height = HOUSE_FOOTPRINT.height;
+  editorState.barn.x = INITIAL_BARN.x;
+  editorState.barn.y = INITIAL_BARN.y;
+  editorState.barn.width = BARN_FOOTPRINT.width;
+  editorState.barn.height = BARN_FOOTPRINT.height;
+  editorState.player.x = 1;
+  editorState.player.y = 1;
+  editorState.player.moving = false;
+  editorState.player.path = [];
+  editorState.toolbarItems = [makeStack("harvestHand"), makeStack("carrot"), null, null, null];
+  editorState.inventoryItems = [makeStack("wheat"), makeStack("turnip"), null, null, null, null, null, null, null, null];
+}
+
+function switchActiveProfile(profileId) {
+  if (!editorState.profiles[profileId]) return false;
+  saveActiveProfileProgress();
+  editorState.activeProfileId = profileId;
+  localStorage.setItem(ACTIVE_PROFILE_KEY, profileId);
+  resetProfileRuntimeState();
+  loadActiveProfileProgress();
+  setInventoryOpen(false);
+  setMarketOpen(false);
+  renderProfileUi();
+  renderEditorToolUi();
+  renderViewUi();
+  renderItemUi();
+  game.scene.getScene("TacticsScene")?.renderScenario();
+  return true;
 }
 
 function currentSceneTime() {

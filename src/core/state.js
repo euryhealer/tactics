@@ -10,6 +10,8 @@ const LAND_BASE_PRICE = 20;
 const LAND_PRICE_STEP = 15;
 const PLAYER_STEP_MS = 180;
 const SAVE_VERSION = 1;
+const PROFILE_REGISTRY_KEY = `tactics.profiles.v${SAVE_VERSION}`;
+const ACTIVE_PROFILE_KEY = `tactics.activeProfile.v${SAVE_VERSION}`;
 const INITIAL_HOUSE = {
   x: 8,
   y: 1,
@@ -199,6 +201,13 @@ const ui = {
   marketGrid: document.querySelector("#marketGrid"),
   marketClose: document.querySelector("#marketClose"),
   profileName: document.querySelector("#profileName"),
+  loginScreen: document.querySelector("#loginScreen"),
+  loginForm: document.querySelector("#loginForm"),
+  loginProfileSelect: document.querySelector("#loginProfileSelect"),
+  loginProfileInput: document.querySelector("#loginProfileInput"),
+  loginButton: document.querySelector("#loginButton"),
+  createProfileButton: document.querySelector("#createProfileButton"),
+  loginMessage: document.querySelector("#loginMessage"),
   zoomIn: document.querySelector("#zoomIn"),
   zoomOut: document.querySelector("#zoomOut"),
 };
@@ -212,6 +221,58 @@ const DEFAULT_INTERIORS = {
     },
   },
 };
+
+function makePlayerProfile(id, name) {
+  return {
+    id,
+    name,
+    title: "Player",
+    isMain: false,
+    permissions: {
+      shapeElevatedTerrain: false,
+      rotateCamera: false,
+    },
+  };
+}
+
+function loadProfileRegistry() {
+  if (!window.localStorage) return { ...USER_PROFILES };
+  try {
+    const saved = JSON.parse(localStorage.getItem(PROFILE_REGISTRY_KEY) || "null");
+    const profiles = { ...USER_PROFILES };
+    if (saved && typeof saved === "object") {
+      for (const profile of Object.values(saved)) {
+        if (!profile?.id || profile.id === "GM") continue;
+        profiles[profile.id] = makePlayerProfile(profile.id, profile.name || profile.id);
+      }
+    }
+    return profiles;
+  } catch (error) {
+    console.warn("Could not load profile registry.", error);
+    return { ...USER_PROFILES };
+  }
+}
+
+function saveProfileRegistry() {
+  if (!window.localStorage) return;
+  const userProfiles = Object.fromEntries(
+    Object.entries(editorState.profiles)
+      .filter(([profileId]) => profileId !== "GM")
+      .map(([profileId, profile]) => [profileId, { id: profile.id, name: profile.name }]),
+  );
+  localStorage.setItem(PROFILE_REGISTRY_KEY, JSON.stringify(userProfiles));
+}
+
+function makeProfileId(name) {
+  const base = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "player";
+  let candidate = base;
+  let index = 2;
+  while (editorState.profiles[candidate]) {
+    candidate = `${base}-${index}`;
+    index += 1;
+  }
+  return candidate;
+}
 
 function cloneInteriorItems(interiorId) {
   const interior = DEFAULT_INTERIORS[interiorId];
@@ -231,8 +292,8 @@ function makeDefaultInteriors() {
 }
 
 const editorState = {
-  activeProfileId: "GM",
-  profiles: USER_PROFILES,
+  activeProfileId: localStorage.getItem(ACTIVE_PROFILE_KEY) || "GM",
+  profiles: loadProfileRegistry(),
   enabled: false,
   blockBrush: "grass",
   selected: null,
@@ -276,4 +337,8 @@ const editorState = {
   toolbarItems: [makeStack("harvestHand"), makeStack("carrot"), null, null, null],
   inventoryItems: [makeStack("wheat"), makeStack("turnip"), null, null, null, null, null, null, null, null],
 };
+
+if (!editorState.profiles[editorState.activeProfileId]) {
+  editorState.activeProfileId = "GM";
+}
 

@@ -7,13 +7,16 @@
   ui.modeToggle.textContent = enabled ? "Editor: On" : "Editor: Off";
   ui.modeToggle.setAttribute("aria-pressed", String(enabled));
   ui.modeHint.textContent = enabled
-    ? "Editor mode: click same material to stack, Shift+click to lower, click a building to move it."
+    ? (profileCan("shapeElevatedTerrain")
+      ? "Editor mode: click same material to stack, Shift+click to lower, click a building to move it."
+      : "Editor mode: change block material and move buildings. Height editing is locked for this profile.")
     : "Play mode: choose seed packs to plant or the hand to harvest mature crops. Press I for inventory.";
   renderEditorToolUi();
   saveActiveProfileProgress();
 }
 
 function bindEditorUi() {
+  bindLoginUi();
   renderProfileUi();
   renderEditorToolUi();
   renderItemUi();
@@ -48,6 +51,65 @@ function bindEditorUi() {
   });
 }
 
+function bindLoginUi() {
+  renderLoginProfiles();
+  const hasActiveLogin = Boolean(localStorage.getItem(ACTIVE_PROFILE_KEY));
+  ui.loginScreen?.classList.toggle("hidden", hasActiveLogin);
+  ui.loginButton?.addEventListener("click", () => {
+    const profileId = ui.loginProfileSelect?.value;
+    if (!profileId || !editorState.profiles[profileId]) {
+      showLoginMessage("Choose a profile.");
+      return;
+    }
+    enterProfile(profileId);
+  });
+  ui.loginForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    createPlayerProfileFromLogin();
+  });
+}
+
+function renderLoginProfiles() {
+  if (!ui.loginProfileSelect) return;
+  ui.loginProfileSelect.replaceChildren();
+  Object.values(editorState.profiles).forEach((profile) => {
+    const option = document.createElement("option");
+    option.value = profile.id;
+    option.textContent = profile.isMain ? `${profile.name} (GM)` : profile.name;
+    ui.loginProfileSelect.append(option);
+  });
+  ui.loginProfileSelect.value = editorState.profiles[editorState.activeProfileId]
+    ? editorState.activeProfileId
+    : "GM";
+}
+
+function showLoginMessage(message) {
+  if (ui.loginMessage) ui.loginMessage.textContent = message;
+}
+
+function enterProfile(profileId) {
+  if (!switchActiveProfile(profileId)) {
+    showLoginMessage("Profile not found.");
+    return;
+  }
+  ui.loginScreen?.classList.add("hidden");
+  showLoginMessage("");
+}
+
+function createPlayerProfileFromLogin() {
+  const rawName = ui.loginProfileInput?.value.trim() || "";
+  if (rawName.length < 2) {
+    showLoginMessage("Use at least 2 characters.");
+    return;
+  }
+  const profileId = makeProfileId(rawName);
+  editorState.profiles[profileId] = makePlayerProfile(profileId, rawName);
+  saveProfileRegistry();
+  renderLoginProfiles();
+  ui.loginProfileInput.value = "";
+  enterProfile(profileId);
+}
+
 function renderViewUi() {
   ui.cameraAngle.textContent = `${editorState.viewRotation * 90}deg`;
 }
@@ -65,6 +127,7 @@ function renderProfileUi() {
   ui.profileName.textContent = profile.name;
   ui.profileName.title = profile.title;
   if (ui.cameraRotate) ui.cameraRotate.disabled = !profileCan("rotateCamera");
+  renderLoginProfiles();
 }
 
 function renderItemUi() {

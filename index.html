@@ -69,6 +69,26 @@
       </section>
       <p class="help">E toggles editor. I opens inventory. M opens market. WASD/arrows move. Shift+click walks to a tile.</p>
     </main>
+    <section id="loginScreen" class="login-screen" aria-label="Login screen">
+      <form id="loginForm" class="login-card" autocomplete="off">
+        <div>
+          <h2>Tactics Block Terrain</h2>
+          <p>Choose a profile or create a new player.</p>
+        </div>
+        <label>
+          Existing profile
+          <select id="loginProfileSelect" aria-label="Existing profile"></select>
+        </label>
+        <button id="loginButton" type="button">Enter Game</button>
+        <div class="login-divider"><span>or</span></div>
+        <label>
+          New player
+          <input id="loginProfileInput" type="text" maxlength="18" placeholder="Player name" aria-label="New player name" />
+        </label>
+        <button id="createProfileButton" type="submit">Create Player</button>
+        <p id="loginMessage" class="login-message" role="status"></p>
+      </form>
+    </section>
     <script src="./vendor/phaser.min.js"></script>
     <script src="./src/core/state.js"></script>
     <script src="./src/core/world.js"></script>
