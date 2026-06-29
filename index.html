@@ -36,7 +36,7 @@
           <button class="tool" type="button" data-tool="block" data-value="water">Water</button>
           <button class="tool" type="button" data-tool="block" data-value="soil">Soil</button>
         </div>
-        <p id="modeHint">Play mode: plant seeds, harvest mature crops, or open market with M.</p>
+        <p id="modeHint">Play mode: plant seeds, harvest mature crops, or open Market with M and Marketplace with P.</p>
       </section>
       <section class="game-area">
         <aside id="itemToolbar" class="item-toolbar" aria-label="Crop toolbar"></aside>
@@ -44,8 +44,13 @@
           <span aria-hidden="true">&#128247;</span>
           <strong id="cameraAngle">0deg</strong>
         </button>
-        <div class="gold-panel" aria-label="Gold"><span>Gold</span><strong id="goldAmount">0</strong></div>
+        <div class="gold-panel currency-panel" aria-label="Currencies">
+          <span>Gold</span><strong id="goldAmount">0</strong>
+          <span>Token</span><strong id="premiumTokenAmount">0</strong>
+        </div>
+        <button id="inventoryToggle" class="inventory-toggle" type="button">Inventory</button>
         <button id="marketToggle" class="market-toggle" type="button">Market</button>
+        <button id="marketplaceToggle" class="marketplace-toggle" type="button">Marketplace</button>
         <div class="view-controls" aria-label="View controls">
           <button id="zoomOut" type="button" aria-label="Zoom out">-</button>
           <button id="zoomIn" type="button" aria-label="Zoom in">+</button>
@@ -59,16 +64,24 @@
           </header>
           <div id="inventoryGrid" class="inventory-grid"></div>
         </section>
-        <section id="marketPanel" class="market-panel hidden" aria-label="Market">
+        <section id="marketPanel" class="market-panel hidden" role="dialog" aria-modal="true" aria-label="Market">
           <header>
             <h2>Market</h2>
-            <span>Buy seeds, sell harvests</span>
+            <span>Gold shop and produce sales</span>
             <button id="marketClose" class="panel-close" type="button" aria-label="Close market">X</button>
           </header>
           <div id="marketGrid" class="market-grid"></div>
         </section>
+        <section id="marketplacePanel" class="market-panel marketplace-panel hidden" role="dialog" aria-modal="true" aria-label="Marketplace">
+          <header>
+            <h2>Marketplace</h2>
+            <span>Player listings with tokens</span>
+            <button id="marketplaceClose" class="panel-close" type="button" aria-label="Close marketplace">X</button>
+          </header>
+          <div id="marketplaceGrid" class="market-grid"></div>
+        </section>
       </section>
-      <p class="help">E toggles editor. I opens inventory. M opens market. WASD/arrows move. Shift+click walks to a tile.</p>
+      <p class="help">E toggles editor. I opens inventory. M opens Market. P opens Marketplace. WASD/arrows move. Shift+click walks to a tile.</p>
     </main>
     <section id="loginScreen" class="login-screen" aria-label="Login screen">
       <form id="loginForm" class="login-card" autocomplete="off">

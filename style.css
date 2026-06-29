@@ -168,6 +168,7 @@ h1 {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  margin-left: auto;
 }
 
 .tool-group span,
@@ -177,7 +178,8 @@ h1 {
 }
 
 #modeHint {
-  margin-left: auto;
+  flex-basis: 100%;
+  text-align: right;
 }
 
 .game-area {
@@ -201,7 +203,9 @@ h1 {
 
 .camera-rotate,
 .gold-panel,
-.market-toggle {
+.inventory-toggle,
+.market-toggle,
+.marketplace-toggle {
   position: absolute;
   z-index: 6;
   right: 14px;
@@ -212,7 +216,9 @@ h1 {
 }
 
 .camera-rotate {
-  top: 16px;
+  position: fixed;
+  right: 28px;
+  bottom: 24px;
   min-width: 112px;
   height: 36px;
   display: flex;
@@ -248,13 +254,13 @@ h1 {
 
 .gold-panel {
   top: 60px;
-  min-width: 112px;
-  height: 36px;
-  display: flex;
+  min-width: 154px;
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 12px;
+  gap: 2px 10px;
+  padding: 6px 12px;
 }
 
 .gold-panel span {
@@ -269,22 +275,65 @@ h1 {
   font-size: 18px;
 }
 
-.market-toggle {
-  top: 104px;
+.inventory-toggle {
+  top: 126px;
   height: 34px;
+  min-width: 154px;
   padding: 0 14px;
-  color: #172024;
-  background: #efcb73;
+  color: #eef6f0;
+  background: #203943;
   cursor: pointer;
   font: inherit;
   font-weight: 800;
 }
 
+.inventory-toggle:hover {
+  border-color: #efcb73;
+  background: #efcb73;
+  color: #172024;
+}
+
+.market-toggle {
+  top: 168px;
+  height: 34px;
+  min-width: 154px;
+  padding: 0 14px;
+  color: #eef6f0;
+  background: #203943;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.market-toggle:hover {
+  border-color: #efcb73;
+  background: #efcb73;
+  color: #172024;
+}
+
+.marketplace-toggle {
+  top: 210px;
+  min-width: 154px;
+  height: 34px;
+  padding: 0 12px;
+  color: #eef6f0;
+  background: #203943;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.marketplace-toggle:hover {
+  border-color: #efcb73;
+  background: #efcb73;
+  color: #172024;
+}
+
 .view-controls {
-  position: absolute;
+  position: fixed;
   z-index: 6;
-  top: 146px;
-  right: 14px;
+  right: 28px;
+  bottom: 68px;
   display: flex;
   gap: 6px;
 }
@@ -373,6 +422,14 @@ h1 {
   padding: 0 3px;
 }
 
+.toolbar-slot .slot-count,
+.inventory-slot .slot-count,
+.inventory-panel .slot-count {
+  color: #050a0d;
+  font-size: 10px;
+  font-weight: 900;
+}
+
 .inventory-panel {
   position: absolute;
   z-index: 8;
@@ -388,19 +445,27 @@ h1 {
 
 .market-panel {
   position: absolute;
-  z-index: 8;
-  top: 188px;
-  right: 14px;
-  width: 340px;
+  z-index: 14;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  width: min(620px, calc(100% - 96px));
+  max-height: min(600px, calc(100% - 80px));
+  overflow-y: auto;
+  transform: translate(-50%, -50%);
   border: 1px solid #7d6740;
   border-radius: 10px;
   background: #101d24ee;
-  box-shadow: 0 20px 50px #020608cc;
+  box-shadow: 0 26px 70px #020608ee, 0 0 0 999px #02060866;
   padding: 12px;
 }
 
 .market-panel.hidden {
   display: none;
+}
+
+.marketplace-panel {
+  border-color: #4f7083;
 }
 
 .market-panel header {
@@ -450,6 +515,47 @@ h1 {
   gap: 8px;
 }
 
+.market-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid #334a55;
+  border-radius: 8px;
+  background: #0f1a20;
+}
+
+.market-tabs button {
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #b8c9c2;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.market-tabs button:hover,
+.market-tabs button.active {
+  border-color: #efcb73;
+  background: #efcb73;
+  color: #172024;
+}
+
+.market-section-title {
+  padding: 8px 10px;
+  border: 1px solid #6d5930;
+  border-radius: 7px;
+  background: #1f333bdd;
+  color: #ffd76e;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .market-row {
   min-height: 54px;
   display: grid;
@@ -460,6 +566,17 @@ h1 {
   border-radius: 8px;
   background: #172830;
   padding: 6px;
+}
+
+.marketplace-list-row {
+  grid-template-columns: 42px 1fr auto auto auto;
+}
+
+.market-row-empty {
+  grid-template-columns: 1fr;
+  min-height: 44px;
+  color: #b8c9c2;
+  font-size: 13px;
 }
 
 .market-row img {
@@ -494,6 +611,13 @@ h1 {
   font-size: 11px;
 }
 
+.market-total {
+  color: #ffd76e;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 .market-row button {
   height: 30px;
   border: 1px solid #efcb73;
@@ -511,7 +635,8 @@ h1 {
   opacity: 0.45;
 }
 
-.market-qty-stepper {
+.market-qty-stepper,
+.market-price-stepper {
   height: 30px;
   display: grid;
   grid-template-columns: 26px 34px 26px;
@@ -546,7 +671,8 @@ h1 {
   opacity: 0.35;
 }
 
-.market-qty-value {
+.market-qty-value,
+.market-price-value {
   min-width: 34px;
   color: #eef6f0;
   font-size: 12px;
@@ -615,7 +741,7 @@ h1 {
   overflow: hidden;
   border: 1px solid #405059;
   border-radius: 8px;
-  background: #142027;
+  background: #9fd8e8;
   box-shadow: 0 24px 70px #03080a99;
 }
 
@@ -636,7 +762,9 @@ h1 {
 .interior-active .item-toolbar,
 .interior-active .camera-rotate,
 .interior-active .gold-panel,
+.interior-active .inventory-toggle,
 .interior-active .market-toggle,
+.interior-active .marketplace-toggle,
 .interior-active .view-controls,
 .interior-active .inventory-panel,
 .interior-active .market-panel,

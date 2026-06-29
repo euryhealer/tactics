@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Farm Tactics Economy and Marketplace Whitepaper</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10171b;
+        --panel: #172329;
+        --panel-2: #22363e;
+        --text: #f5f1df;
+        --muted: #b7c7c5;
+        --line: #48616b;
+        --accent: #f0c96a;
+        --green: #80c47b;
+        --code: #0b1215;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.15;
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 38px;
+      }
+
+      h2 {
+        margin-top: 34px;
+        color: var(--accent);
+        font-size: 26px;
+      }
+
+      h3 {
+        margin-top: 22px;
+        font-size: 19px;
+      }
+
+      p {
+        margin: 10px 0;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      code,
+      pre {
+        background: var(--code);
+        border: 1px solid #263943;
+        border-radius: 4px;
+      }
+
+      code {
+        padding: 2px 6px;
+      }
+
+      pre {
+        overflow-x: auto;
+        padding: 12px;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 18px;
+        max-width: 900px;
+      }
+
+      .toc,
+      section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .toc {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 22px;
+      }
+
+      .toc ol {
+        columns: 2;
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      section {
+        margin-top: 18px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel-2);
+        color: var(--accent);
+      }
+
+      ul,
+      ol {
+        margin: 10px 0 0;
+        padding-left: 22px;
+      }
+
+      .tag {
+        display: inline-block;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--green);
+        margin: 3px 4px 3px 0;
+        padding: 2px 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Farm Tactics Economy and Marketplace Whitepaper</h1>
+        <p class="lead">
+          A staged plan for expanding Farm Tactics with more produce, a player marketplace,
+          premium token economy, fruit trees, animals, and backend-ready trade rules.
+        </p>
+      </header>
+
+      <nav class="toc" aria-label="Table of contents">
+        <strong>Contents</strong>
+        <ol>
+          <li><a href="#vision">Vision</a></li>
+          <li><a href="#currencies">Currencies</a></li>
+          <li><a href="#produce">Produce Expansion</a></li>
+          <li><a href="#trees">Trees and Fruits</a></li>
+          <li><a href="#animals">Animals</a></li>
+          <li><a href="#marketplace">Player Marketplace</a></li>
+          <li><a href="#backend">Backend Ownership</a></li>
+          <li><a href="#first-slice">First Implementation Slice</a></li>
+          <li><a href="#roadmap">Roadmap</a></li>
+        </ol>
+      </nav>
+
+      <section id="vision">
+        <h2>1. Vision</h2>
+        <p>
+          The economy should support normal farming progression while preparing for real
+          player-to-player trading. Gold remains the main gameplay currency. Premium tokens
+          are a separate constrained currency for rare items, special animals, cosmetics,
+          limited listings, boosts, and future monetization-safe mechanics.
+        </p>
+      </section>
+
+      <section id="currencies">
+        <h2>2. Currencies</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Currency</th>
+              <th>Purpose</th>
+              <th>Current status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>currencies.gold</code></td>
+              <td>Normal game economy: seeds, land expansion and direct produce sales.</td>
+              <td>Implemented as profile state.</td>
+            </tr>
+            <tr>
+              <td><code>currencies.premiumToken</code></td>
+              <td>Premium/rare economy: player marketplace purchases, special saplings, animals, future cosmetics and listing slots.</td>
+              <td>Implemented as profile state.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="produce">
+        <h2>3. Produce Expansion</h2>
+        <p>The first fruit products are:</p>
+        <p>
+          <span class="tag">Apple</span>
+          <span class="tag">Orange</span>
+          <span class="tag">Berry</span>
+        </p>
+        <p>
+          Fruits are inventory items and marketplace goods first. The next step is connecting
+          them to mature trees and harvest cooldowns.
+        </p>
+      </section>
+
+      <section id="trees">
+        <h2>4. Trees and Fruits</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tree</th>
+              <th>Sapling item</th>
+              <th>Fruit item</th>
+              <th>Future behavior</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Apple Tree</td>
+              <td><code>appleSapling</code></td>
+              <td><code>apple</code></td>
+              <td>Plant on grass, grow once, then produce fruit on cooldown.</td>
+            </tr>
+            <tr>
+              <td>Orange Tree</td>
+              <td><code>orangeSapling</code></td>
+              <td><code>orange</code></td>
+              <td>Plant on grass, grow once, then produce fruit on cooldown.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="animals">
+        <h2>5. Animals</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Animal</th>
+              <th>Product</th>
+              <th>Future behavior</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Chicken</td>
+              <td>Egg</td>
+              <td>Lives in barn/coop and produces eggs after a timer.</td>
+            </tr>
+            <tr>
+              <td>Cow</td>
+              <td>Milk</td>
+              <td>Lives in barn/pasture and produces milk after a timer.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="marketplace">
+        <h2>6. Player Marketplace</h2>
+        <p>
+          The first marketplace is local/mock only. It uses static listings stored in the
+          player profile and removes a listing after purchase. Player marketplace listings
+          use premium token only. This creates the UI and data shape before backend integration.
+        </p>
+        <pre><code>{
+  "id": "mock-apple",
+  "seller": "Orchard Guild",
+  "itemId": "apple",
+  "qty": 8,
+  "priceCurrency": "premiumToken",
+  "unitPrice": 1
+}</code></pre>
+      </section>
+
+      <section id="backend">
+        <h2>7. Backend Ownership</h2>
+        <p>
+          Once this becomes real player trading, the backend must own currency balances,
+          inventory quantities, listing creation, purchase validation, and transaction logs.
+          The client can preview transactions, but it should not be authoritative.
+        </p>
+      </section>
+
+      <section id="first-slice">
+        <h2>8. First Implementation Slice</h2>
+        <ul>
+          <li>Add <code>currencies.gold</code> and <code>currencies.premiumToken</code>.</li>
+          <li>Add fruits: apple, orange, berry.</li>
+          <li>Add trees: apple tree, orange tree.</li>
+          <li>Add animals: chicken, cow.</li>
+          <li>Add local/mock player marketplace UI.</li>
+        </ul>
+      </section>
+
+      <section id="roadmap">
+        <h2>9. Roadmap</h2>
+        <ol>
+          <li>Move economy catalog data into standalone data files.</li>
+          <li>Add planting logic for tree saplings on grass.</li>
+          <li>Add tree growth and fruit harvest cooldowns.</li>
+          <li>Add barn capacity and animal ownership rules.</li>
+          <li>Add animal production timers and collection UI.</li>
+          <li>Add marketplace listing creation for players.</li>
+          <li>Connect marketplace and currency writes to backend.</li>
+        </ol>
+      </section>
+    </main>
+  </body>
+</html>

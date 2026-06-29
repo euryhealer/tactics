@@ -26,6 +26,25 @@
     scene.renderScenario();
     return true;
   },
+  plantTree: (x, y, tree = "appleTree") => {
+    const cell = terrainGrid[y]?.[x];
+    if (!cell || cell.type !== "grass" || isBuildingTile(cell) || !TREE_TYPES[tree]) return false;
+    cell.tree = {
+      type: tree,
+      plantedAt: game.scene.getScene("TacticsScene").time.now,
+      lastHarvestAt: null,
+    };
+    game.scene.getScene("TacticsScene").renderScenario();
+    return true;
+  },
+  harvestTree: (x, y) => {
+    const cell = terrainGrid[y]?.[x];
+    if (!cell || !cell.tree) return false;
+    const scene = game.scene.getScene("TacticsScene");
+    scene.harvestTree(cell);
+    scene.renderScenario();
+    return true;
+  },
   setEditor: (enabled) => {
     setEditorMode(enabled);
     game.scene.getScene("TacticsScene").renderScenario();

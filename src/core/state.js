@@ -13,7 +13,8 @@ const SAVE_VERSION = 1;
 const PROFILE_REGISTRY_KEY = `tactics.profiles.v${SAVE_VERSION}`;
 const ACTIVE_PROFILE_KEY = `tactics.activeProfile.v${SAVE_VERSION}`;
 const GM_ACCESS_PATH = "/GMANAGER";
-const IS_GM_ACCESS = window.location.pathname.replace(/\/$/, "") === GM_ACCESS_PATH;
+const IS_GM_ACCESS = window.location.pathname.replace(/\/$/, "") === GM_ACCESS_PATH
+  || new URLSearchParams(window.location.search).get("gm") === "1";
 const INITIAL_HOUSE = {
   x: 8,
   y: 1,
@@ -159,7 +160,148 @@ const ITEMS = {
     toolbarAllowed: false,
     sellPrice: 25,
   },
+  apple: {
+    id: "apple",
+    label: "Apple",
+    type: "fruit",
+    icon: "assets/items/apple.png",
+    toolbarAllowed: false,
+    sellPrice: 12,
+  },
+  orange: {
+    id: "orange",
+    label: "Orange",
+    type: "fruit",
+    icon: "assets/items/orange.png",
+    toolbarAllowed: false,
+    sellPrice: 14,
+  },
+  berry: {
+    id: "berry",
+    label: "Berry",
+    type: "fruit",
+    icon: "assets/items/berry.png",
+    toolbarAllowed: false,
+    sellPrice: 10,
+  },
+  appleSapling: {
+    id: "appleSapling",
+    label: "Apple Seeds",
+    type: "treeSeed",
+    tree: "appleTree",
+    icon: "assets/items/apple-seed-pack.png",
+    buyPrice: 2,
+  },
+  orangeSapling: {
+    id: "orangeSapling",
+    label: "Orange Seeds",
+    type: "treeSeed",
+    tree: "orangeTree",
+    icon: "assets/items/orange-seed-pack.png",
+    buyPrice: 3,
+  },
+  berrySeed: {
+    id: "berrySeed",
+    label: "Berry Seeds",
+    type: "treeSeed",
+    tree: "berryBush",
+    icon: "assets/items/berry-seed-pack.png",
+    buyPrice: 1,
+  },
+  chicken: {
+    id: "chicken",
+    label: "Chicken",
+    type: "animal",
+    animal: "chicken",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='none'/%3E%3Cpath d='M20 40c-3-13 7-25 21-22 11 2 16 15 10 25-6 10-25 11-31-3z' fill='%23fff0c7' stroke='%23624b2e' stroke-width='3'/%3E%3Cpath d='M39 18c0-7 8-8 10-2 5-1 8 4 5 8' fill='%23e54435' stroke='%2364211b' stroke-width='2'/%3E%3Ccircle cx='43' cy='29' r='3' fill='%23101618'/%3E%3Cpath d='M51 33l8 4-8 4z' fill='%23f5a12c' stroke='%236d3913' stroke-width='2'/%3E%3Cpath d='M29 47l-3 9M39 48l3 8' stroke='%23c98025' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E",
+    buyPrice: 120,
+  },
+  cow: {
+    id: "cow",
+    label: "Cow",
+    type: "animal",
+    animal: "cow",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='none'/%3E%3Cpath d='M13 33c0-11 9-19 23-19 13 0 22 8 22 19 0 12-9 20-22 20-14 0-23-8-23-20z' fill='%23f4ead7' stroke='%23443124' stroke-width='3'/%3E%3Cpath d='M21 20c5-5 14-5 17 3-3 5-13 6-17-3zM41 35c7-2 12 2 11 9-6 4-13 0-11-9z' fill='%233f3128'/%3E%3Cpath d='M15 27l-8-6M50 25l8-6' stroke='%23815a35' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='25' cy='33' r='3' fill='%23101316'/%3E%3Ccircle cx='43' cy='33' r='3' fill='%23101316'/%3E%3Cpath d='M29 42c3 3 9 3 12 0' stroke='%23815a35' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E",
+    buyPrice: 260,
+  },
+  egg: {
+    id: "egg",
+    label: "Egg",
+    type: "animalProduct",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='none'/%3E%3Cpath d='M32 8c12 0 21 20 18 34-2 10-9 16-18 16s-16-6-18-16C11 28 20 8 32 8z' fill='%23fff0cf' stroke='%23624b2e' stroke-width='3'/%3E%3Cpath d='M24 22c3-5 9-8 15-6' stroke='%23ffffff' stroke-width='5' stroke-linecap='round' opacity='.65'/%3E%3C/svg%3E",
+    toolbarAllowed: false,
+    sellPrice: 18,
+  },
+  milk: {
+    id: "milk",
+    label: "Milk",
+    type: "animalProduct",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='none'/%3E%3Cpath d='M24 7h16l2 13 8 9v26H14V29l8-9z' fill='%23f7fbff' stroke='%23324450' stroke-width='3'/%3E%3Cpath d='M22 20h20M20 36h24' stroke='%2387c5e8' stroke-width='4'/%3E%3Cpath d='M24 7h16v9H24z' fill='%23dfeef7' stroke='%23324450' stroke-width='3'/%3E%3C/svg%3E",
+    toolbarAllowed: false,
+    sellPrice: 32,
+  },
 };
+
+const TREE_TYPES = {
+  appleTree: {
+    id: "appleTree",
+    label: "Apple Tree",
+    saplingItem: "appleSapling",
+    fruitItem: "apple",
+    growMs: 45000,
+    harvestCooldownMs: 45000,
+    stages: ["appleTreeStage1", "appleTreeStage2", "appleTreeStage3"],
+    footprint: { width: 1, height: 1 },
+  },
+  orangeTree: {
+    id: "orangeTree",
+    label: "Orange Tree",
+    saplingItem: "orangeSapling",
+    fruitItem: "orange",
+    growMs: 60000,
+    harvestCooldownMs: 60000,
+    stages: ["orangeTreeStage1", "orangeTreeStage2", "orangeTreeStage3"],
+    footprint: { width: 1, height: 1 },
+  },
+  berryBush: {
+    id: "berryBush",
+    label: "Berry Bush",
+    saplingItem: "berrySeed",
+    fruitItem: "berry",
+    growMs: 30000,
+    harvestCooldownMs: 30000,
+    stages: ["berryBushStage1", "berryBushStage2", "berryBushStage3"],
+    footprint: { width: 1, height: 1 },
+  },
+};
+
+const ANIMAL_TYPES = {
+  chicken: {
+    id: "chicken",
+    label: "Chicken",
+    productItem: "egg",
+    productionMs: 60000,
+    homeType: "barn",
+  },
+  cow: {
+    id: "cow",
+    label: "Cow",
+    productItem: "milk",
+    productionMs: 120000,
+    homeType: "barn",
+  },
+};
+
+const MARKETPLACE_LISTINGS = [
+  { id: "mock-apple", seller: "Orchard Guild", itemId: "apple", qty: 8, priceCurrency: "premiumToken", unitPrice: 1 },
+  { id: "mock-orange", seller: "Sun Grove", itemId: "orange", qty: 6, priceCurrency: "premiumToken", unitPrice: 1 },
+  { id: "mock-berry", seller: "Berry Coop", itemId: "berry", qty: 12, priceCurrency: "premiumToken", unitPrice: 1 },
+  { id: "mock-apple-sapling", seller: "Tree Nursery", itemId: "appleSapling", qty: 1, priceCurrency: "premiumToken", unitPrice: 2 },
+  { id: "mock-orange-sapling", seller: "Tree Nursery", itemId: "orangeSapling", qty: 1, priceCurrency: "premiumToken", unitPrice: 3 },
+  { id: "mock-berry-seed", seller: "Berry Coop", itemId: "berrySeed", qty: 1, priceCurrency: "premiumToken", unitPrice: 1 },
+  { id: "mock-chicken", seller: "Valley Ranch", itemId: "chicken", qty: 1, priceCurrency: "premiumToken", unitPrice: 4 },
+  { id: "mock-cow", seller: "Valley Ranch", itemId: "cow", qty: 1, priceCurrency: "premiumToken", unitPrice: 8 },
+];
 
 const MAX_STACK = 99;
 
@@ -198,16 +340,22 @@ const ui = {
   modeHint: document.querySelector("#modeHint"),
   blockTools: [...document.querySelectorAll('[data-tool="block"]')],
   itemToolbar: document.querySelector("#itemToolbar"),
+  inventoryToggle: document.querySelector("#inventoryToggle"),
   inventoryPanel: document.querySelector("#inventoryPanel"),
   inventoryGrid: document.querySelector("#inventoryGrid"),
   inventoryClose: document.querySelector("#inventoryClose"),
   cameraRotate: document.querySelector("#cameraRotate"),
   cameraAngle: document.querySelector("#cameraAngle"),
   goldAmount: document.querySelector("#goldAmount"),
+  premiumTokenAmount: document.querySelector("#premiumTokenAmount"),
   marketToggle: document.querySelector("#marketToggle"),
+  marketplaceToggle: document.querySelector("#marketplaceToggle"),
   marketPanel: document.querySelector("#marketPanel"),
   marketGrid: document.querySelector("#marketGrid"),
   marketClose: document.querySelector("#marketClose"),
+  marketplacePanel: document.querySelector("#marketplacePanel"),
+  marketplaceGrid: document.querySelector("#marketplaceGrid"),
+  marketplaceClose: document.querySelector("#marketplaceClose"),
   profileName: document.querySelector("#profileName"),
   logoutButton: document.querySelector("#logoutButton"),
   loginScreen: document.querySelector("#loginScreen"),
@@ -319,8 +467,18 @@ const editorState = {
   selectedToolbarIndex: 1,
   inventoryOpen: false,
   marketOpen: false,
+  marketplaceOpen: false,
+  marketTab: "buy",
+  marketplaceTab: "buy",
   interiors: makeDefaultInteriors(),
-  gold: 24,
+  currencies: {
+    gold: 205,
+    premiumToken: 10,
+  },
+  gold: 205,
+  marketplaceListings: MARKETPLACE_LISTINGS.map((listing) => ({ ...listing })),
+  ownedAnimals: [],
+  plantedTrees: [],
   landExpansions: 0,
   viewRotation: 0,
   zoom: 1,
@@ -360,4 +518,5 @@ const editorState = {
 if (!editorState.profiles[editorState.activeProfileId]) {
   editorState.activeProfileId = "GM";
 }
+
 

@@ -153,8 +153,15 @@ function resetProfileRuntimeState() {
   editorState.selectedToolbarIndex = 1;
   editorState.inventoryOpen = false;
   editorState.marketOpen = false;
+  editorState.marketplaceOpen = false;
+  editorState.marketTab = "buy";
+  editorState.marketplaceTab = "buy";
   editorState.interiors = makeDefaultInteriors();
-  editorState.gold = 24;
+  editorState.currencies = { gold: 205, premiumToken: 10 };
+  editorState.gold = editorState.currencies.gold;
+  editorState.marketplaceListings = MARKETPLACE_LISTINGS.map((listing) => ({ ...listing }));
+  editorState.ownedAnimals = [];
+  editorState.plantedTrees = [];
   editorState.landExpansions = 0;
   editorState.viewRotation = 0;
   editorState.zoom = 1;
@@ -187,6 +194,7 @@ function switchActiveProfile(profileId) {
   loadActiveProfileProgress();
   setInventoryOpen(false);
   setMarketOpen(false);
+  setMarketplaceOpen(false);
   renderProfileUi();
   renderEditorToolUi();
   renderViewUi();
@@ -201,6 +209,7 @@ function logoutActiveProfile() {
   setEditorMode(false);
   setInventoryOpen(false);
   setMarketOpen(false);
+  setMarketplaceOpen(false);
   clearBuildingMoveState();
   renderLoginProfiles();
   ui.loginScreen?.classList.remove("hidden");
@@ -221,6 +230,15 @@ function serializeCell(cell) {
       ? {
         type: cell.crop.type,
         elapsedMs: Math.max(0, currentSceneTime() - cell.crop.startedAt),
+      }
+      : null,
+    tree: cell.tree
+      ? {
+        type: cell.tree.type,
+        elapsedMs: Math.max(0, currentSceneTime() - cell.tree.plantedAt),
+        harvestElapsedMs: cell.tree.lastHarvestAt === null || cell.tree.lastHarvestAt === undefined
+          ? null
+          : Math.max(0, currentSceneTime() - cell.tree.lastHarvestAt),
       }
       : null,
   };
@@ -253,7 +271,11 @@ function saveActiveProfileProgress() {
     version: SAVE_VERSION,
     activeProfileId: editorState.activeProfileId,
     savedAt: Date.now(),
-    gold: editorState.gold,
+    currencies: { ...editorState.currencies },
+    gold: editorState.currencies.gold,
+    marketplaceListings: editorState.marketplaceListings.map((listing) => ({ ...listing })),
+    ownedAnimals: editorState.ownedAnimals.map((animal) => ({ ...animal })),
+    plantedTrees: editorState.plantedTrees.map((tree) => ({ ...tree })),
     landExpansions: editorState.landExpansions,
     viewRotation: editorState.viewRotation,
     zoom: editorState.zoom,
@@ -286,6 +308,15 @@ function restoreCell(saved) {
       ? {
         type: saved.crop.type,
         startedAt: -Math.max(0, Number(saved.crop.elapsedMs) || 0),
+      }
+      : null,
+    tree: saved.tree?.type && TREE_TYPES[saved.tree.type]
+      ? {
+        type: saved.tree.type,
+        plantedAt: -Math.max(0, Number(saved.tree.elapsedMs) || 0),
+        lastHarvestAt: saved.tree.harvestElapsedMs === null || saved.tree.harvestElapsedMs === undefined
+          ? null
+          : -Math.max(0, Number(saved.tree.harvestElapsedMs) || 0),
       }
       : null,
   };
@@ -325,7 +356,22 @@ function loadActiveProfileProgress() {
   try {
     const saved = JSON.parse(raw);
     if (saved?.version !== SAVE_VERSION || saved.activeProfileId !== editorState.activeProfileId) return;
-    editorState.gold = Number.isFinite(saved.gold) ? saved.gold : editorState.gold;
+    editorState.currencies.gold = Number.isFinite(saved.currencies?.gold)
+      ? saved.currencies.gold
+      : (Number.isFinite(saved.gold) ? saved.gold : editorState.currencies.gold);
+    editorState.currencies.premiumToken = Number.isFinite(saved.currencies?.premiumToken)
+      ? saved.currencies.premiumToken
+      : editorState.currencies.premiumToken;
+    editorState.gold = editorState.currencies.gold;
+    editorState.marketplaceListings = Array.isArray(saved.marketplaceListings)
+      ? saved.marketplaceListings.filter((listing) => ITEMS[listing.itemId]).map((listing) => ({ ...listing }))
+      : editorState.marketplaceListings;
+    editorState.ownedAnimals = Array.isArray(saved.ownedAnimals)
+      ? saved.ownedAnimals.filter((animal) => ANIMAL_TYPES[animal.type]).map((animal) => ({ ...animal }))
+      : editorState.ownedAnimals;
+    editorState.plantedTrees = Array.isArray(saved.plantedTrees)
+      ? saved.plantedTrees.filter((tree) => TREE_TYPES[tree.type]).map((tree) => ({ ...tree }))
+      : editorState.plantedTrees;
     editorState.landExpansions = Number.isFinite(saved.landExpansions) ? saved.landExpansions : editorState.landExpansions;
     editorState.viewRotation = Number.isInteger(saved.viewRotation) ? Phaser.Math.Wrap(saved.viewRotation, 0, 4) : editorState.viewRotation;
     editorState.zoom = Number.isFinite(saved.zoom) ? Phaser.Math.Clamp(saved.zoom, ZOOM_MIN, ZOOM_MAX) : editorState.zoom;

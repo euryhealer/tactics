@@ -6,7 +6,7 @@ const config = {
   parent: "game",
   width: 1152,
   height: 704,
-  backgroundColor: "#142027",
+  backgroundColor: "#9fd8e8",
   pixelArt: false,
   scene: [TacticsScene, HouseInteriorScene],
 };

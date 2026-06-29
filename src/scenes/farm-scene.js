@@ -11,6 +11,15 @@
     this.load.image("soilTop", "assets/soil-top.png");
     this.load.image("house", "assets/buildings/house.png");
     this.load.image("barn", "assets/buildings/barn.png");
+    this.load.image("appleTreeStage1", "assets/trees/apple-tree-stage-1.png");
+    this.load.image("appleTreeStage2", "assets/trees/apple-tree-stage-2.png");
+    this.load.image("appleTreeStage3", "assets/trees/apple-tree.png");
+    this.load.image("orangeTreeStage1", "assets/trees/orange-tree-stage-1.png");
+    this.load.image("orangeTreeStage2", "assets/trees/orange-tree-stage-2.png");
+    this.load.image("orangeTreeStage3", "assets/trees/orange-tree.png");
+    this.load.image("berryBushStage1", "assets/trees/berry-bush-stage-1.png");
+    this.load.image("berryBushStage2", "assets/trees/berry-bush-stage-2.png");
+    this.load.image("berryBushStage3", "assets/trees/berry-bush-stage-3.png");
     for (const [cropId, crop] of Object.entries(CROPS)) {
       this.load.image(crop.seedTexture, `assets/crops/${cropId}-seed.png`);
       crop.stages.forEach((texture, index) => {
@@ -20,7 +29,7 @@
   }
 
   create() {
-    this.cameras.main.setBackgroundColor("#16242c");
+    this.cameras.main.setBackgroundColor("#9fd8e8");
     this.applyZoom();
     this.sampleTexturePalettes();
     this.createTopWrapTextures();
@@ -94,7 +103,7 @@
 
   update(time) {
     const second = Math.floor(time / 1000);
-    if (second !== this.lastRenderSecond && this.hasGrowingCrops()) {
+    if (second !== this.lastRenderSecond && (this.hasGrowingCrops() || this.hasGrowingTrees())) {
       this.lastRenderSecond = second;
       this.renderScenario();
     }
@@ -123,17 +132,11 @@
   }
 
   drawBackdrop() {
-    const g = this.add.graphics();
-    g.fillGradientStyle(0x24353f, 0x24353f, 0x10171c, 0x10171c, 1);
-    g.fillRect(0, 0, this.scale.width, this.scale.height);
-    g.fillStyle(0x0b1115, 0.45);
-    g.fillEllipse(580, 545, 820, 220);
+    // Farm background intentionally left transparent for the page container.
   }
 
   renderWaterPlane() {
-    const g = this.add.graphics();
-    g.fillStyle(0x102a49, 0.32);
-    g.fillEllipse(590, 380, 760, 300);
+    // Reserved for future scene backgrounds.
   }
 
   drawBlock(cell) {
@@ -170,6 +173,7 @@
     overlay.strokePoints([{ x: pos.x, y: top }, { x: right, y: mid }, { x: pos.x, y: bottom }, { x: left, y: mid }, { x: pos.x, y: top }], false);
 
     if (cell.crop && !isBuildingTile(cell)) this.drawCrop(cell, pos);
+    if (cell.tree && !isBuildingTile(cell)) this.drawTree(cell, pos);
     if (editorState.enabled) this.drawEditorOverlay(cell, pos);
   }
 
@@ -317,6 +321,45 @@
     text.setOrigin(0.5, 0.5);
   }
 
+  drawTree(cell, pos) {
+    const tree = TREE_TYPES[cell.tree.type];
+    if (!tree) return;
+    const stage = this.treeStage(cell);
+    const texture = tree.stages[Math.max(0, stage - 1)];
+    const scale = cell.tree.type === "berryBush"
+      ? [0.48, 0.56, 0.64][stage - 1]
+      : [0.62, 0.58, 0.5][stage - 1];
+    const g = this.add.graphics();
+    g.fillStyle(0x10210f, 0.24);
+    g.fillEllipse(pos.x, pos.y + 7, 42, 14);
+    const sprite = this.add.image(pos.x, pos.y - 4, texture);
+    sprite.setOrigin(0.5, 0.86);
+    sprite.setScale(scale);
+    this.drawTreeTimer(cell, pos);
+  }
+
+  drawTreeTimer(cell, pos) {
+    const tree = TREE_TYPES[cell.tree.type];
+    if (!tree) return;
+    let label = "Fruit";
+    if (!this.isTreeMature(cell)) {
+      const remainingMs = Math.max(0, tree.growMs - (this.time.now - cell.tree.plantedAt));
+      label = `${Math.ceil(remainingMs / 1000)}s`;
+    } else if (!this.isTreeReady(cell)) {
+      const remainingMs = Math.max(0, tree.harvestCooldownMs - (this.time.now - cell.tree.lastHarvestAt));
+      label = `${Math.ceil(remainingMs / 1000)}s`;
+    }
+    const text = this.add.text(pos.x, pos.y - 54, label, {
+      fontFamily: "Inter, Segoe UI, sans-serif",
+      fontSize: "13px",
+      fontStyle: "bold",
+      color: "#ffffff",
+      stroke: "#000000",
+      strokeThickness: 4,
+    });
+    text.setOrigin(0.5, 0.5);
+  }
+
   drawPlayer() {
     const cell = getCell(editorState.player.x, editorState.player.y);
     if (!cell) return;
@@ -418,6 +461,9 @@
       }
       if (event.code === "KeyM") {
         setMarketOpen(!editorState.marketOpen);
+      }
+      if (event.code === "KeyP") {
+        setMarketplaceOpen(!editorState.marketplaceOpen);
       }
       if (event.code === "Escape") {
         closePanels();
@@ -622,20 +668,18 @@
     if (tile.type === "water") {
       tile.height = 0;
       tile.crop = null;
+      tile.tree = null;
     } else if (tile.height === 0) {
       tile.height = 1;
     }
     if (tile.type !== "soil") tile.crop = null;
+    if (tile.type !== "grass") tile.tree = null;
     editorState.selected = tile.type === "soil" && !isBuildingTile(tile) ? { x: tile.x, y: tile.y } : null;
     saveActiveProfileProgress();
     this.statusText?.setText(`Painted (${tile.x}, ${tile.y}) as ${BLOCKS[tile.type].label}`);
   }
 
   applyCrop(tile) {
-    if (tile.type !== "soil" || isBuildingTile(tile)) {
-      editorState.selected = null;
-      return;
-    }
     const itemId = slotItemId(editorState.toolbarItems[editorState.selectedToolbarIndex]);
     const item = itemId ? ITEMS[itemId] : null;
     if (!item) {
@@ -644,7 +688,16 @@
     }
     if (item.action === "harvest") {
       editorState.selected = { x: tile.x, y: tile.y };
-      this.harvestCrop(tile);
+      if (tile.crop) this.harvestCrop(tile);
+      if (tile.tree) this.harvestTree(tile);
+      return;
+    }
+    if (item.type === "treeSeed") {
+      this.applyTree(tile, item);
+      return;
+    }
+    if (tile.type !== "soil" || isBuildingTile(tile)) {
+      editorState.selected = null;
       return;
     }
     if (item.type !== "seed" || !item.crop || tile.crop) {
@@ -659,11 +712,36 @@
     consumeToolbarItem(editorState.selectedToolbarIndex);
   }
 
+  applyTree(tile, item) {
+    if (tile.type !== "grass" || isBuildingTile(tile) || tile.crop || tile.tree || !TREE_TYPES[item.tree]) {
+      editorState.selected = null;
+      return;
+    }
+    editorState.selected = { x: tile.x, y: tile.y };
+    tile.tree = {
+      type: item.tree,
+      plantedAt: this.time.now,
+      lastHarvestAt: null,
+    };
+    consumeToolbarItem(editorState.selectedToolbarIndex);
+    saveActiveProfileProgress();
+    renderItemUi();
+  }
+
   harvestCrop(tile) {
     if (!tile.crop || !this.isCropReady(tile)) return;
     const produceId = `${tile.crop.type}Produce`;
     if (!addInventoryItem(produceId)) return;
     tile.crop = null;
+    renderItemUi();
+    saveActiveProfileProgress();
+  }
+
+  harvestTree(tile) {
+    if (!tile.tree || !this.isTreeReady(tile)) return;
+    const tree = TREE_TYPES[tile.tree.type];
+    if (!tree || !addInventoryItem(tree.fruitItem)) return;
+    tile.tree.lastHarvestAt = this.time.now;
     renderItemUi();
     saveActiveProfileProgress();
   }
@@ -685,8 +763,16 @@
     return terrainGrid.some((row) => row.some((cell) => cell.crop));
   }
 
+  hasGrowingTrees() {
+    return terrainGrid.some((row) => row.some((cell) => cell.tree && !this.isTreeReady(cell)));
+  }
+
   cropCount() {
     return terrainGrid.reduce((total, row) => total + row.filter((cell) => cell.crop).length, 0);
+  }
+
+  treeCount() {
+    return terrainGrid.reduce((total, row) => total + row.filter((cell) => cell.tree).length, 0);
   }
 
   cropStage(cell) {
@@ -699,6 +785,28 @@
 
   isCropReady(cell) {
     return this.cropStage(cell) >= 3;
+  }
+
+  treeStage(cell) {
+    if (!cell.tree) return 0;
+    const tree = TREE_TYPES[cell.tree.type];
+    if (!tree) return 0;
+    const elapsed = this.time.now - cell.tree.plantedAt;
+    const progress = Phaser.Math.Clamp(elapsed / tree.growMs, 0, 1);
+    return progress >= 1 ? 3 : progress >= 0.5 ? 2 : 1;
+  }
+
+  isTreeMature(cell) {
+    return this.treeStage(cell) >= 3;
+  }
+
+  isTreeReady(cell) {
+    if (!cell.tree || !this.isTreeMature(cell)) return false;
+    const tree = TREE_TYPES[cell.tree.type];
+    if (!tree) return false;
+    return cell.tree.lastHarvestAt === null
+      || cell.tree.lastHarvestAt === undefined
+      || this.time.now - cell.tree.lastHarvestAt >= tree.harvestCooldownMs;
   }
 
   cellSeed(cell) {

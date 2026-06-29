@@ -10,7 +10,7 @@
     ? (profileCan("shapeElevatedTerrain")
       ? "Editor mode: click same material to stack, Shift+click to lower, click a building to move it."
       : "Editor mode: change block material and move buildings. Height editing is locked for this profile.")
-    : "Play mode: choose seed packs to plant or the hand to harvest mature crops. Press I for inventory.";
+    : "Play mode: choose seed packs to plant or the hand to harvest. Press I for inventory, M for Market, P for Marketplace.";
   renderEditorToolUi();
   saveActiveProfileProgress();
 }
@@ -22,6 +22,7 @@ function bindEditorUi() {
   renderItemUi();
   renderViewUi();
   renderMarketUi();
+  renderMarketplaceUi();
   ui.modeToggle.addEventListener("click", () => {
     setEditorMode(!editorState.enabled);
     game.scene.getScene("TacticsScene")?.renderScenario();
@@ -38,9 +39,16 @@ function bindEditorUi() {
   ui.marketToggle.addEventListener("click", () => {
     setMarketOpen(!editorState.marketOpen);
   });
+  ui.marketplaceToggle.addEventListener("click", () => {
+    setMarketplaceOpen(!editorState.marketplaceOpen);
+  });
+  ui.inventoryToggle.addEventListener("click", () => {
+    setInventoryOpen(!editorState.inventoryOpen);
+  });
   ui.logoutButton?.addEventListener("click", () => logoutActiveProfile());
   ui.inventoryClose.addEventListener("click", () => setInventoryOpen(false));
   ui.marketClose.addEventListener("click", () => setMarketOpen(false));
+  ui.marketplaceClose.addEventListener("click", () => setMarketplaceOpen(false));
   ui.cameraRotate.addEventListener("click", () => {
     game.scene.getScene("TacticsScene")?.rotateView();
   });
@@ -149,7 +157,7 @@ function renderProfileUi() {
 }
 
 function renderItemUi() {
-  ui.goldAmount.textContent = String(editorState.gold);
+  renderCurrencyUi();
   ui.itemToolbar.replaceChildren();
   editorState.toolbarItems.forEach((itemStack, index) => {
     const slot = createItemSlot(itemStack, "toolbar", index);
@@ -162,21 +170,109 @@ function renderItemUi() {
     ui.inventoryGrid.append(createItemSlot(itemStack, "inventory", index));
   });
   renderMarketUi();
+  renderMarketplaceUi();
 }
 
 function renderMarketUi() {
   if (!ui.marketGrid) return;
-  ui.goldAmount.textContent = String(editorState.gold);
+  renderCurrencyUi();
   ui.marketGrid.replaceChildren();
-  ui.marketGrid.append(createLandMarketRow());
+  ui.marketGrid.append(createTabBar(
+    editorState.marketTab,
+    [
+      { id: "buy", label: "Buy" },
+      { id: "sell", label: "Sell" },
+    ],
+    (tab) => {
+      editorState.marketTab = tab;
+      renderMarketUi();
+    },
+  ));
+  ui.marketGrid.append(createMarketSectionTitle(editorState.marketTab === "buy" ? "Buy With Gold" : "Sell For Gold"));
   const buyItems = ["carrot", "wheat", "turnip"];
-  const sellItems = ["carrotProduce", "wheatProduce", "turnipProduce"];
-  buyItems.forEach((itemId) => {
-    ui.marketGrid.append(createMarketRow(itemId, "buy"));
+  const sellItems = ["carrotProduce", "wheatProduce", "turnipProduce", "apple", "orange", "berry", "egg", "milk"];
+  if (editorState.marketTab === "buy") {
+    ui.marketGrid.append(createLandMarketRow());
+    buyItems.forEach((itemId) => {
+      ui.marketGrid.append(createMarketRow(itemId, "buy"));
+    });
+  } else {
+    sellItems.forEach((itemId) => {
+      ui.marketGrid.append(createMarketRow(itemId, "sell"));
+    });
+  }
+}
+
+function renderMarketplaceUi() {
+  if (!ui.marketplaceGrid) return;
+  renderCurrencyUi();
+  ui.marketplaceGrid.replaceChildren();
+  ui.marketplaceGrid.append(createTabBar(
+    editorState.marketplaceTab,
+    [
+      { id: "buy", label: "Buy" },
+      { id: "list", label: "List Item" },
+    ],
+    (tab) => {
+      editorState.marketplaceTab = tab;
+      renderMarketplaceUi();
+    },
+  ));
+  if (editorState.marketplaceTab === "buy") {
+    ui.marketplaceGrid.append(createMarketSectionTitle("Token Listings"));
+    editorState.marketplaceListings.forEach((listing) => {
+      ui.marketplaceGrid.append(createMarketplaceRow(listing));
+    });
+  } else {
+    ui.marketplaceGrid.append(createMarketSectionTitle("List Tradable Inventory"));
+    const tradableStacks = tradableInventoryStacks();
+    if (tradableStacks.length === 0) {
+      ui.marketplaceGrid.append(createEmptyMarketRow("No tradable items in inventory."));
+    } else {
+      tradableStacks.forEach(({ itemId, qty }) => {
+        ui.marketplaceGrid.append(createMarketplaceListRow(itemId, qty));
+      });
+    }
+  }
+}
+
+function renderCurrencyUi() {
+  editorState.gold = editorState.currencies.gold;
+  ui.goldAmount.textContent = String(editorState.currencies.gold);
+  if (ui.premiumTokenAmount) ui.premiumTokenAmount.textContent = String(editorState.currencies.premiumToken);
+}
+
+function currencyLabel(currency) {
+  return currency === "premiumToken" ? "tokens" : "gold";
+}
+
+function createMarketSectionTitle(label) {
+  const title = document.createElement("div");
+  title.className = "market-section-title";
+  title.textContent = label;
+  return title;
+}
+
+function createTabBar(activeTab, tabs, onChange) {
+  const tabBar = document.createElement("div");
+  tabBar.className = "market-tabs";
+  tabs.forEach((tab) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = tab.label;
+    button.className = tab.id === activeTab ? "active" : "";
+    button.setAttribute("aria-pressed", String(tab.id === activeTab));
+    button.addEventListener("click", () => onChange(tab.id));
+    tabBar.append(button);
   });
-  sellItems.forEach((itemId) => {
-    ui.marketGrid.append(createMarketRow(itemId, "sell"));
-  });
+  return tabBar;
+}
+
+function createEmptyMarketRow(message) {
+  const row = document.createElement("div");
+  row.className = "market-row market-row-empty";
+  row.textContent = message;
+  return row;
 }
 
 function createMarketRow(itemId, mode) {
@@ -207,7 +303,7 @@ function createMarketRow(itemId, mode) {
     });
     row.append(qtyControl);
   } else {
-    const maxBuy = Math.min(Math.floor(editorState.gold / item.buyPrice), inventoryCapacityForItem(itemId));
+    const maxBuy = Math.min(Math.floor(editorState.currencies.gold / item.buyPrice), inventoryCapacityForItem(itemId));
     const qtyControl = createQtyStepper(maxBuy, (qty) => {
       selectedQty = qty;
       price.textContent = `Buy: ${item.buyPrice} gold | Total: ${selectedQty * item.buyPrice} gold`;
@@ -226,6 +322,87 @@ function createMarketRow(itemId, mode) {
     else sellProduce(itemId, selectedQty);
   });
   row.append(button);
+  return row;
+}
+
+function createMarketplaceRow(listing) {
+  const item = ITEMS[listing.itemId];
+  const row = document.createElement("div");
+  row.className = "market-row player-market-row";
+
+  const image = document.createElement("img");
+  image.src = item.icon;
+  image.alt = item.label;
+  row.append(image);
+
+  const details = document.createElement("div");
+  const name = document.createElement("strong");
+  name.textContent = item.label;
+  const price = document.createElement("small");
+  price.textContent = `${listing.seller} | Qty ${listing.qty} | ${listing.unitPrice} ${currencyLabel(listing.priceCurrency)} each`;
+  details.append(name, price);
+  row.append(details);
+
+  const total = listing.qty * listing.unitPrice;
+  const totalLabel = document.createElement("span");
+  totalLabel.className = "market-total";
+  totalLabel.textContent = `${total} ${currencyLabel(listing.priceCurrency)}`;
+  row.append(totalLabel);
+
+  const button = document.createElement("button");
+  button.type = "button";
+  const ownListing = listing.ownerProfileId === editorState.activeProfileId;
+  button.textContent = ownListing ? "Cancel" : "Buy";
+  button.disabled = ownListing
+    ? inventoryCapacityForItem(listing.itemId) < listing.qty
+    : editorState.currencies[listing.priceCurrency] < total || inventoryCapacityForItem(listing.itemId) < listing.qty;
+  button.addEventListener("click", () => {
+    if (ownListing) cancelMarketplaceListing(listing.id);
+    else buyMarketplaceListing(listing.id);
+  });
+  row.append(button);
+  return row;
+}
+
+function createMarketplaceListRow(itemId, owned) {
+  const item = ITEMS[itemId];
+  const row = document.createElement("div");
+  row.className = "market-row marketplace-list-row";
+
+  const image = document.createElement("img");
+  image.src = item.icon;
+  image.alt = item.label;
+  row.append(image);
+
+  const details = document.createElement("div");
+  const name = document.createElement("strong");
+  name.textContent = item.label;
+  const price = document.createElement("small");
+  details.append(name, price);
+  row.append(details);
+
+  let selectedQty = 1;
+  let selectedPrice = Math.max(1, Math.ceil((item.sellPrice || item.buyPrice || 1) / 10));
+
+  const qtyControl = createQtyStepper(owned, (qty) => {
+    selectedQty = qty;
+    price.textContent = `Owned: ${owned} | Total: ${selectedQty * selectedPrice} tokens`;
+  });
+  row.append(qtyControl);
+
+  const priceControl = createPriceStepper(selectedPrice, (unitPrice) => {
+    selectedPrice = unitPrice;
+    price.textContent = `Owned: ${owned} | Total: ${selectedQty * selectedPrice} tokens`;
+  });
+  row.append(priceControl);
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "List";
+  button.disabled = owned <= 0;
+  button.addEventListener("click", () => listMarketplaceItem(itemId, selectedQty, selectedPrice));
+  row.append(button);
+  price.textContent = `Owned: ${owned} | Total: ${selectedQty * selectedPrice} tokens`;
   return row;
 }
 
@@ -263,6 +440,40 @@ function createQtyStepper(maxQty, onChange) {
   return qtyControl;
 }
 
+function createPriceStepper(initialPrice, onChange) {
+  let price = Math.max(1, Math.floor(initialPrice));
+  const priceControl = document.createElement("div");
+  priceControl.className = "market-price-stepper";
+
+  const decrement = document.createElement("button");
+  decrement.type = "button";
+  decrement.className = "market-qty-button";
+  decrement.textContent = "-";
+
+  const priceValue = document.createElement("span");
+  priceValue.className = "market-price-value";
+
+  const increment = document.createElement("button");
+  increment.type = "button";
+  increment.className = "market-qty-button";
+  increment.textContent = "+";
+
+  const updatePrice = (nextPrice) => {
+    price = Math.max(1, Math.min(99, nextPrice));
+    priceValue.textContent = `${price}t`;
+    decrement.disabled = price <= 1;
+    increment.disabled = price >= 99;
+    onChange(price);
+  };
+
+  decrement.addEventListener("click", () => updatePrice(price - 1));
+  increment.addEventListener("click", () => updatePrice(price + 1));
+  updatePrice(price);
+
+  priceControl.append(decrement, priceValue, increment);
+  return priceControl;
+}
+
 function createLandMarketRow() {
   const row = document.createElement("div");
   row.className = "market-row";
@@ -287,7 +498,7 @@ function createLandMarketRow() {
   const button = document.createElement("button");
   button.type = "button";
   button.textContent = "Buy";
-  button.disabled = editorState.gold < cost;
+  button.disabled = editorState.currencies.gold < cost;
   button.addEventListener("click", buyLandExpansion);
   row.append(button);
   return row;
@@ -428,17 +639,18 @@ function buySeed(itemId, qty = 1) {
   const buyQty = Math.floor(qty);
   if (buyQty <= 0) return;
   const totalCost = item.buyPrice * buyQty;
-  if (editorState.gold < totalCost || inventoryCapacityForItem(itemId) < buyQty) return;
+  if (editorState.currencies.gold < totalCost || inventoryCapacityForItem(itemId) < buyQty) return;
   const remaining = addItemsToSlots(editorState.inventoryItems, itemId, buyQty);
   if (remaining > 0) return;
-  editorState.gold -= totalCost;
+  editorState.currencies.gold -= totalCost;
+  editorState.gold = editorState.currencies.gold;
   saveActiveProfileProgress();
   renderItemUi();
 }
 
 function sellProduce(itemId, qty = 1) {
   const item = ITEMS[itemId];
-  if (!item || item.type !== "produce") return;
+  if (!item || !["produce", "fruit", "animalProduct"].includes(item.type)) return;
   let remaining = Math.min(qty, inventoryItemCount(itemId));
   if (remaining <= 0) return;
   const sold = remaining;
@@ -450,7 +662,103 @@ function sellProduce(itemId, qty = 1) {
     remaining -= remove;
     if (slot.qty <= 0) editorState.inventoryItems[i] = null;
   }
-  editorState.gold += item.sellPrice * sold;
+  editorState.currencies.gold += item.sellPrice * sold;
+  editorState.gold = editorState.currencies.gold;
+  saveActiveProfileProgress();
+  renderItemUi();
+}
+
+function isTradableInventoryItem(itemId) {
+  const item = ITEMS[itemId];
+  return Boolean(item && ["seed", "treeSeed", "produce", "fruit", "animalProduct"].includes(item.type));
+}
+
+function tradableInventoryStacks() {
+  const totals = new Map();
+  editorState.inventoryItems.forEach((slot) => {
+    const itemId = slotItemId(slot);
+    if (!itemId || !isTradableInventoryItem(itemId)) return;
+    totals.set(itemId, (totals.get(itemId) || 0) + slotQty(slot));
+  });
+  return [...totals.entries()]
+    .map(([itemId, qty]) => ({ itemId, qty }))
+    .sort((a, b) => ITEMS[a.itemId].label.localeCompare(ITEMS[b.itemId].label));
+}
+
+function removeInventoryItems(itemId, qty) {
+  let remaining = Math.min(qty, inventoryItemCount(itemId));
+  if (remaining <= 0) return 0;
+  const removed = remaining;
+  for (let i = 0; i < editorState.inventoryItems.length && remaining > 0; i += 1) {
+    const slot = editorState.inventoryItems[i];
+    if (slotItemId(slot) !== itemId) continue;
+    const remove = Math.min(slot.qty, remaining);
+    slot.qty -= remove;
+    remaining -= remove;
+    if (slot.qty <= 0) editorState.inventoryItems[i] = null;
+  }
+  return removed - remaining;
+}
+
+function listMarketplaceItem(itemId, qty, unitPrice) {
+  const item = ITEMS[itemId];
+  const listQty = Math.max(1, Math.min(inventoryItemCount(itemId), Math.floor(qty)));
+  const price = Math.max(1, Math.min(99, Math.floor(unitPrice)));
+  if (!item || !isTradableInventoryItem(itemId) || listQty <= 0) return;
+  const removed = removeInventoryItems(itemId, listQty);
+  if (removed !== listQty) return;
+  const profile = activeProfile();
+  editorState.marketplaceListings.unshift({
+    id: `player-${itemId}-${Date.now().toString(36)}`,
+    seller: profile?.name || "Player",
+    ownerProfileId: editorState.activeProfileId,
+    itemId,
+    qty: listQty,
+    priceCurrency: "premiumToken",
+    unitPrice: price,
+  });
+  editorState.marketplaceTab = "buy";
+  saveActiveProfileProgress();
+  renderItemUi();
+}
+
+function cancelMarketplaceListing(listingId) {
+  const listing = editorState.marketplaceListings.find((candidate) => candidate.id === listingId);
+  if (!listing || listing.ownerProfileId !== editorState.activeProfileId) return;
+  if (inventoryCapacityForItem(listing.itemId) < listing.qty) return;
+  const remaining = addItemsToSlots(editorState.inventoryItems, listing.itemId, listing.qty);
+  if (remaining > 0) return;
+  editorState.marketplaceListings = editorState.marketplaceListings.filter((candidate) => candidate.id !== listingId);
+  saveActiveProfileProgress();
+  renderItemUi();
+}
+
+function buyMarketplaceListing(listingId) {
+  const listing = editorState.marketplaceListings.find((candidate) => candidate.id === listingId);
+  if (!listing || !ITEMS[listing.itemId]) return;
+  const total = listing.qty * listing.unitPrice;
+  if (editorState.currencies[listing.priceCurrency] < total) return;
+  if (inventoryCapacityForItem(listing.itemId) < listing.qty) return;
+  const remaining = addItemsToSlots(editorState.inventoryItems, listing.itemId, listing.qty);
+  if (remaining > 0) return;
+  editorState.currencies[listing.priceCurrency] -= total;
+  editorState.gold = editorState.currencies.gold;
+  if (ITEMS[listing.itemId].type === "animal") {
+    editorState.ownedAnimals.push({
+      id: `${listing.itemId}-${Date.now().toString(36)}`,
+      type: ITEMS[listing.itemId].animal,
+      acquiredAt: Date.now(),
+    });
+  }
+  if (ITEMS[listing.itemId].type === "treeSeed") {
+    editorState.plantedTrees.push({
+      id: `${listing.itemId}-${Date.now().toString(36)}`,
+      type: ITEMS[listing.itemId].tree,
+      acquiredAt: Date.now(),
+      planted: false,
+    });
+  }
+  editorState.marketplaceListings = editorState.marketplaceListings.filter((candidate) => candidate.id !== listingId);
   saveActiveProfileProgress();
   renderItemUi();
 }
@@ -461,8 +769,9 @@ function landExpansionCost() {
 
 function buyLandExpansion() {
   const cost = landExpansionCost();
-  if (editorState.gold < cost) return;
-  editorState.gold -= cost;
+  if (editorState.currencies.gold < cost) return;
+  editorState.currencies.gold -= cost;
+  editorState.gold = editorState.currencies.gold;
   editorState.landExpansions += 1;
   expandTerrain();
   saveActiveProfileProgress();
@@ -501,21 +810,33 @@ function inventoryItemCount(itemId) {
 
 function setInventoryOpen(open) {
   if (open) setMarketOpen(false);
+  if (open) setMarketplaceOpen(false);
   editorState.inventoryOpen = open;
   ui.inventoryPanel.classList.toggle("hidden", !open);
 }
 
 function setMarketOpen(open) {
   if (open) setInventoryOpen(false);
+  if (open) setMarketplaceOpen(false);
   editorState.marketOpen = open;
   ui.marketPanel.classList.toggle("hidden", !open);
   renderMarketUi();
 }
 
+function setMarketplaceOpen(open) {
+  if (open) setInventoryOpen(false);
+  if (open) setMarketOpen(false);
+  editorState.marketplaceOpen = open;
+  ui.marketplacePanel.classList.toggle("hidden", !open);
+  renderMarketplaceUi();
+}
+
 function closePanels() {
   editorState.inventoryOpen = false;
   editorState.marketOpen = false;
+  editorState.marketplaceOpen = false;
   ui.inventoryPanel.classList.add("hidden");
   ui.marketPanel.classList.add("hidden");
+  ui.marketplacePanel.classList.add("hidden");
 }
 
