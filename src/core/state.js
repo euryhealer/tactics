@@ -175,6 +175,12 @@ function slotQty(slot) {
   return typeof slot === "string" ? 1 : slot?.qty ?? 0;
 }
 
+function isTypingInTextField() {
+  const element = document.activeElement;
+  if (!element) return false;
+  return ["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName) || element.isContentEditable;
+}
+
 const INITIAL_MAP = [
   ["grass:1", "grass:1", "grass:1", "grass:1", "soil:1", "soil:1", "water:0", "water:0", "grass:1", "grass:1", "grass:1"],
   ["grass:1", "soil:1", "soil:1", "grass:1", "soil:1", "soil:1", "water:0", "grass:1", "soil:1", "soil:1", "grass:1"],

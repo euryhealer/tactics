@@ -386,12 +386,8 @@
   }
 
   createInput() {
-    this.input.keyboard.addKey("R");
-    this.input.keyboard.addKey("E");
-    this.input.keyboard.addKey("I");
-    this.input.keyboard.addKey("M");
-    this.input.keyboard.addKey("ESC");
     this.input.keyboard.on("keydown", (event) => {
+      if (isTypingInTextField()) return;
       if (event.code === "KeyR") {
         editorState.house.x = INITIAL_HOUSE.x;
         editorState.house.y = INITIAL_HOUSE.y;
