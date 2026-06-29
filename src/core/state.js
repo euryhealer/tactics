@@ -268,7 +268,16 @@ function saveProfileRegistry() {
 }
 
 function makeProfileId(name) {
-  const base = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "player";
+  const asciiName = name
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ñ/g, "n")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  const fallbackId = `player-${Date.now().toString(36).slice(-6)}`;
+  const base = asciiName || fallbackId;
   let candidate = base;
   let index = 2;
   while (editorState.profiles[candidate]) {
