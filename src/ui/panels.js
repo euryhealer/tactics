@@ -38,6 +38,7 @@ function bindEditorUi() {
   ui.marketToggle.addEventListener("click", () => {
     setMarketOpen(!editorState.marketOpen);
   });
+  ui.logoutButton?.addEventListener("click", () => logoutActiveProfile());
   ui.inventoryClose.addEventListener("click", () => setInventoryOpen(false));
   ui.marketClose.addEventListener("click", () => setMarketOpen(false));
   ui.cameraRotate.addEventListener("click", () => {
@@ -52,8 +53,19 @@ function bindEditorUi() {
 }
 
 function bindLoginUi() {
+  if (!IS_GM_ACCESS && editorState.activeProfileId === "GM") {
+    localStorage.removeItem(ACTIVE_PROFILE_KEY);
+    const firstPlayer = Object.values(editorState.profiles).find((profile) => !profile.isMain);
+    if (firstPlayer) editorState.activeProfileId = firstPlayer.id;
+  }
+  if (ui.loginSubtitle) {
+    ui.loginSubtitle.textContent = IS_GM_ACCESS
+      ? "Private Game Manager access."
+      : "Choose a player profile or create a new player.";
+  }
   renderLoginProfiles();
-  const hasActiveLogin = Boolean(localStorage.getItem(ACTIVE_PROFILE_KEY));
+  const activeLogin = localStorage.getItem(ACTIVE_PROFILE_KEY);
+  const hasActiveLogin = Boolean(activeLogin && (IS_GM_ACCESS || activeLogin !== "GM"));
   ui.loginScreen?.classList.toggle("hidden", hasActiveLogin);
   ui.loginButton?.addEventListener("click", () => {
     const profileId = ui.loginProfileSelect?.value;
@@ -72,15 +84,17 @@ function bindLoginUi() {
 function renderLoginProfiles() {
   if (!ui.loginProfileSelect) return;
   ui.loginProfileSelect.replaceChildren();
-  Object.values(editorState.profiles).forEach((profile) => {
+  Object.values(editorState.profiles).filter((profile) => IS_GM_ACCESS || !profile.isMain).forEach((profile) => {
     const option = document.createElement("option");
     option.value = profile.id;
     option.textContent = profile.isMain ? `${profile.name} (GM)` : profile.name;
     ui.loginProfileSelect.append(option);
   });
-  ui.loginProfileSelect.value = editorState.profiles[editorState.activeProfileId]
+  const fallback = IS_GM_ACCESS ? "GM" : ui.loginProfileSelect.options[0]?.value;
+  ui.loginProfileSelect.value = editorState.profiles[editorState.activeProfileId] && (IS_GM_ACCESS || editorState.activeProfileId !== "GM")
     ? editorState.activeProfileId
-    : "GM";
+    : fallback;
+  ui.loginButton.disabled = ui.loginProfileSelect.options.length === 0;
 }
 
 function showLoginMessage(message) {
@@ -88,6 +102,10 @@ function showLoginMessage(message) {
 }
 
 function enterProfile(profileId) {
+  if (profileId === "GM" && !IS_GM_ACCESS) {
+    showLoginMessage("GM access is not available here.");
+    return;
+  }
   if (!switchActiveProfile(profileId)) {
     showLoginMessage("Profile not found.");
     return;

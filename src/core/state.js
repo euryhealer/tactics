@@ -12,6 +12,8 @@ const PLAYER_STEP_MS = 180;
 const SAVE_VERSION = 1;
 const PROFILE_REGISTRY_KEY = `tactics.profiles.v${SAVE_VERSION}`;
 const ACTIVE_PROFILE_KEY = `tactics.activeProfile.v${SAVE_VERSION}`;
+const GM_ACCESS_PATH = "/GMANAGER";
+const IS_GM_ACCESS = window.location.pathname.replace(/\/$/, "") === GM_ACCESS_PATH;
 const INITIAL_HOUSE = {
   x: 8,
   y: 1,
@@ -201,8 +203,10 @@ const ui = {
   marketGrid: document.querySelector("#marketGrid"),
   marketClose: document.querySelector("#marketClose"),
   profileName: document.querySelector("#profileName"),
+  logoutButton: document.querySelector("#logoutButton"),
   loginScreen: document.querySelector("#loginScreen"),
   loginForm: document.querySelector("#loginForm"),
+  loginSubtitle: document.querySelector("#loginSubtitle"),
   loginProfileSelect: document.querySelector("#loginProfileSelect"),
   loginProfileInput: document.querySelector("#loginProfileInput"),
   loginButton: document.querySelector("#loginButton"),

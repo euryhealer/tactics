@@ -195,6 +195,18 @@ function switchActiveProfile(profileId) {
   return true;
 }
 
+function logoutActiveProfile() {
+  saveActiveProfileProgress();
+  localStorage.removeItem(ACTIVE_PROFILE_KEY);
+  setEditorMode(false);
+  setInventoryOpen(false);
+  setMarketOpen(false);
+  clearBuildingMoveState();
+  renderLoginProfiles();
+  ui.loginScreen?.classList.remove("hidden");
+  ui.loginProfileSelect.value = editorState.activeProfileId;
+}
+
 function currentSceneTime() {
   return game?.scene?.getScene("TacticsScene")?.time?.now ?? 0;
 }

@@ -80,6 +80,24 @@ h1 {
   font-size: 16px;
 }
 
+.logout-button {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #405968;
+  border-radius: 7px;
+  background: #14232a;
+  color: #d8e7df;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  border-color: #f0c96a;
+  color: #ffd76e;
+}
+
 .legend {
   display: flex;
   flex-wrap: wrap;
